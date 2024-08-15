@@ -108,4 +108,6 @@ void test_coefficients_buffer_form_poles_coefficients()
     {
         printf("ak%zu %.4f ref: %.4f \n", i, p->a_k[i], ref5[i]);
     }
+
+    // create some asserts
 }
