@@ -1,3 +1,11 @@
+## Tasks:
+
+## Implement 1 filter analog design 
+## Implement transformation to different filters
+## Implement digital filter design using bilinear transform
+## Implement actual topologies of filter 
+## Implement fixed point implementation of that filter 
+
 ## Code of conduct.
 
 ### 1. **Use Descriptive Names:**

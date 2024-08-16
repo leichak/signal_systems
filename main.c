@@ -22,5 +22,7 @@ int main()
     //     printf("w rad/s: %f g: %f [dB]\n", steps[i], gains[i]);
     // }
 
-    test_coefficients_buffer_form_poles_coefficients();
+    // Test calls
+    test_coefficients_butter_sum_form_poles_coefficients();
+    test_transform_wc();
 }
