@@ -2,7 +2,7 @@
 #!/bin/bash
 
 # Define source files
-SOURCE_FILES="main.c AnalogFilters.c"
+SOURCE_FILES="main.c AnalogFilters.c DigitalFilters.c BillinearTransform.c"
 
 # Define output executable name
 OUTPUT_EXECUTABLE="main"
