@@ -1,10 +1,5 @@
-## Tasks:
+## This library provides production ready concepts related to digital signal processing in audio. 
 
-## Implement 1 filter analog design 
-## Implement transformation to different filters
-## Implement digital filter design using bilinear transform
-## Implement actual topologies of filter 
-## Implement fixed point implementation of that filter 
 
 ## Code of conduct.
 
