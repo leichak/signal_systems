@@ -5,46 +5,47 @@
 #include "DigitalFilters.h"
 
 /**
- * @brief Performs a bilinear transform to convert an analog filter
- *        to a digital filter.
+ * @brief Converts an analog filter to a digital filter using the bilinear transform technique.
  *
- * This function transforms an analog filter specified by the
- * AnalogFilter structure to an equivalent digital filter using the
- * bilinear transform method.
+ * This function transforms an analog filter, specified by an `AnalogFilter` structure,
+ * into an equivalent digital filter using the bilinear transformation method.
  *
- * @param p A pointer to the AnalogFilter struct representing the analog filter.
- * @return A pointer to the resulting DigitalFilter struct representing the
- * digital filter.
+ * @param p A pointer to the `AnalogFilter` structure representing the analog filter.
+ * @return A pointer to the resulting `DigitalFilter` structure representing the digital filter.
+ *
+ * This function implements the bilinear transform method, which is commonly used to
+ * convert continuous-time (analog) filters to discrete-time (digital) filters.
  *
  * Reference:
- * https://digitalcommons.unl.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1085&context=imsefacpub
+ *     For more information on the theory behind bilinear transform:
+ *     https://digitalcommons.unl.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1085&context=imsefacpub
  */
 DigitalFilter *transform_analog_to_digital(AnalogFilter *p);
 
 /**
- * @brief Performs a polynomial transformation.
+ * @brief Performs polynomial coefficient transformation as part of the bilinear transformation process.
  *
- * This function handles the transformation of polynomial coefficients
- * as part of the bilinear transformation process.
+ * This function handles the transformation of polynomial coefficients during the bilinear
+ * transform process, which is essential for converting analog filter coefficients to digital ones.
  *
- * @param Order The order of the polynomial.
- * @param beta The beta coefficient used in the transformation.
- * @param gamma The gamma coefficient used in the transformation.
- * @param delta The delta coefficient used in the transformation.
- * @param alpha The alpha coefficient used in the transformation.
- * @param coefficients A pointer to the array of polynomial coefficients.
- * @return A pointer to an array containing the transformed polynomial
- * coefficients.
+ * @param Order The order of the polynomial to be transformed.
+ * @param beta The beta coefficient used in the polynomial transformation.
+ * @param gamma The gamma coefficient used in the polynomial transformation.
+ * @param delta The delta coefficient used in the polynomial transformation.
+ * @param alpha The alpha coefficient used in the polynomial transformation.
+ * @param coefficients A pointer to the array containing the polynomial coefficients to be transformed.
+ * @return A pointer to an array containing the transformed polynomial coefficients.
+ *
+ * The returned array is dynamically allocated and should be freed by the caller after it is no longer needed.
  */
-double *transform_polynomial(int Order, double beta, double gamma, double delta,
-                             double alpha, double *coefficients);
+double *transform_polynomial(int Order, double beta, double gamma, double delta, double alpha, double *coefficients);
 
 /**
- * @brief A test function to validate the analog to digital filter
- * transformation.
+ * @brief Test function for validating the analog-to-digital filter transformation.
  *
- * This function is used to verify that the transform_analog_to_digital function
- * works correctly.
+ * This function tests the `transform_analog_to_digital()` function by generating an analog filter,
+ * transforming it to a digital filter, and then outputting the filter coefficients. It is used
+ * to ensure that the transformation process is working as expected.
  */
 void test_analog_to_digital();
 

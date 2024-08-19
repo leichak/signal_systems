@@ -1,51 +1,52 @@
 #include "AnalogFilters.h"
 
 #include <assert.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
+// Returns the maximum of two integers
 int max_int(int a, int b)
 {
-    if (a > b) {
-        return a;
-    } else
-        return b;
+    return (a > b) ? a : b;
 }
 
+// Computes the Butterworth filter gain for a low-pass filter
 float butter_gain_low_pass(int n, float g0, float wc, float w)
 {
-    return (pow(g0, 2) / (1 + pow((w / wc), 2 * n)));
+    return pow(g0, 2) / (1 + pow((w / wc), 2 * n));
 }
 
+// Computes the logarithmic Butterworth filter gain for a low-pass filter
 float butter_gain_low_pass_log10(int n, float g0, float wc, float w)
 {
     return 10.0f * log10(pow(g0, 2) / (1 + pow((w / wc), 2 * n)));
 }
 
+// Frees allocated memory for the coefficients of the analog filter
 void free_analog_filter(AnalogFilter *p)
 {
     if (p != NULL) {
-        // Free the dynamically allocated coefficients of the denominator polynomial
-        // (a_k)
+        // Free the coefficients of the denominator polynomial (a_k)
         if (p->a_k != NULL) {
             free(p->a_k);
-            p->a_k = NULL; // Prevent accidental use after free
+            p->a_k = NULL;
         }
 
-        // Free the dynamically allocated coefficients of the numerator polynomial
-        // (b_k)
+        // Free the coefficients of the numerator polynomial (b_k)
         if (p->b_k != NULL) {
             free(p->b_k);
-            p->b_k = NULL; // Prevent accidental use after free
+            p->b_k = NULL;
         }
 
         // Free the AnalogFilter structure itself
         free(p);
-        p = NULL; // Optional step, nullifying local pointer passed by value
     }
 }
 
+// Generates the coefficients for a Butterworth filter of a given order
 void butterworth_coefficients(int order, double *coefficients)
 {
-    // Initialize γ (gamma)
     double gamma = M_PI / (2.0 * order);
 
     // Initialize the first coefficient (a0)
@@ -53,17 +54,16 @@ void butterworth_coefficients(int order, double *coefficients)
 
     // Compute remaining coefficients using the product formula
     for (int k = 1; k <= order; ++k) {
-        // Use the recursive relation with the product formula to compute a_k
-        coefficients[k] =
-            coefficients[k - 1] * (cos((k - 1) * gamma) / sin(k * gamma));
+        coefficients[k] = coefficients[k - 1] * (cos((k - 1) * gamma) / sin(k * gamma));
     }
 
-    // Due to symmetry a_k = a_n-k
+    // Exploit symmetry: a_k = a_(n-k)
     for (int k = 0; k <= order / 2; ++k) {
         coefficients[order - k] = coefficients[k];
     }
 }
 
+// Generates an analog filter based on the given specifications
 AnalogFilter *generate_analog_filter(int n, double wc, FilterTypes filter_type, BandType band_type)
 {
     AnalogFilter *f = (AnalogFilter *)malloc(sizeof(AnalogFilter));
@@ -73,8 +73,10 @@ AnalogFilter *generate_analog_filter(int n, double wc, FilterTypes filter_type, 
     switch (filter_type) {
     case BUTTERWORTH:
         assert(generate_butterworth(n, f) != NULL);
+        break;
     }
 
+    // Apply the appropriate frequency transformation
     switch (band_type) {
     case LOWPASS:
         transform_to_low_pass(f, wc);
@@ -89,6 +91,7 @@ AnalogFilter *generate_analog_filter(int n, double wc, FilterTypes filter_type, 
     return f;
 }
 
+// Generates a Butterworth filter and initializes its coefficients
 void *generate_butterworth(int n, AnalogFilter *f)
 {
     f->g_0 = 1.0;
@@ -111,29 +114,24 @@ void *generate_butterworth(int n, AnalogFilter *f)
     }
     butterworth_coefficients(f->order_denominator, f->a_k);
 
-    return f; // meaning it worked
+    return f; // Return a non-null pointer to indicate successful allocation
 }
 
+// Performs a low-pass frequency transformation on the filter
 void transform_to_low_pass(AnalogFilter *p, double wc)
 {
-    // Substitute s -> s / wc
     for (int i = 1; i < p->size_a; i++) {
         p->a_k[i] *= pow(1.0 / wc, i);
     }
 }
 
+// Performs a high-pass frequency transformation on the filter
 void transform_to_high_pass(AnalogFilter *p, double wc)
 {
-    // Substitute s -> wc / s,
-    // Multiplying by highest orders
-
-    // Saving orders
     int order_numerator = p->order_numerator;
     int order_denominator = p->order_denominator;
 
-    printf("%d %d \n", order_denominator, order_numerator);
-
-    // Transformation && wc
+    // Scale the coefficients by wc
     for (size_t i = 1; i < p->size_a; i++) {
         p->a_k[i] *= pow(wc, i);
     }
@@ -141,43 +139,36 @@ void transform_to_high_pass(AnalogFilter *p, double wc)
         p->b_k[i] *= pow(wc, i);
     }
 
-    // Now changing order by numerator/denominator order multiplication (shifting)
+    // Adjust order to account for the high-pass transformation
     p->order_denominator += order_numerator;
     p->size_a = p->order_denominator + 1;
     p->order_numerator += order_denominator;
     p->size_b = p->order_numerator + 1;
+
     double *b = (double *)malloc(p->size_b * sizeof(double));
     double *a = (double *)malloc(p->size_a * sizeof(double));
     size_t size = max_int(p->size_a, p->size_b);
 
+    // Perform order adjustments (shifting polynomial coefficients)
     for (size_t i = 0; i < size; i++) {
         if (i < p->size_b) {
-            b[i] = 0.0;
-            if (i >= order_denominator)
-                b[i] = p->b_k[i - order_denominator];
+            b[i] = (i >= order_denominator) ? p->b_k[i - order_denominator] : 0.0;
         }
         if (i < p->size_a) {
-            a[i] = 0.0;
-            if (i >= order_numerator) {
-                a[i] = p->a_k[i - order_numerator];
-            }
+            a[i] = (i >= order_numerator) ? p->a_k[i - order_numerator] : 0.0;
         }
     }
 
-    // Reversing orders (multiplying by polynomial order)
-    int i = 0, j = p->size_a - 1;
-    while (i < j || i != j) {
+    // Reverse the orders (required for high-pass transformation)
+    for (int i = 0, j = p->size_a - 1; i < j || i != j; i++, j--) {
         double t = a[j];
         a[j] = a[i];
         a[i] = t;
-        i++, j--;
     }
-    i = 0, j = p->size_b - 1;
-    while (i < j || i != j) {
+    for (int i = 0, j = p->size_b - 1; i < j || i != j; i++, j--) {
         double t = b[j];
         b[j] = b[i];
         b[i] = t;
-        i++, j--;
     }
 
     free(p->a_k);
@@ -186,6 +177,7 @@ void transform_to_high_pass(AnalogFilter *p, double wc)
     p->b_k = b;
 }
 
+// Normalizes the filter coefficients to their maximum
 void normalize_to_max(AnalogFilter *p)
 {
     double a_max = p->a_k[0];
@@ -208,6 +200,7 @@ void normalize_to_max(AnalogFilter *p)
     }
 }
 
+// Test function for generating analog filters
 void test_generate_filters()
 {
     int order = 4;
@@ -215,7 +208,7 @@ void test_generate_filters()
     AnalogFilter *p = generate_analog_filter(order, 0.5, BUTTERWORTH, HIGHPASS);
 
     for (size_t i = 0; i < p->size_a; i++) {
-        printf("g0 %.10f ak%zu %.20f ref: %.20f\n", p->g_0, i, p->a_k[i], ref5[i]);
+        printf("g0 %.10f a_k%zu %.20f ref: %.20f\n", p->g_0, i, p->a_k[i], ref5[i]);
     }
 
     free_analog_filter(p);

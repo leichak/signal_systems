@@ -6,25 +6,27 @@
 #include "DigitalFilters.h"
 
 /**
- * @brief Performs the polynomial transformation required for the bilinear
- * transform.
+ * @brief Performs the polynomial transformation required for the bilinear transform.
+ *
+ * This transformation is typically used in converting an analog filter's transfer function
+ * to its digital counterpart.
  *
  * @param Order The order of the polynomial.
  * @param beta The beta coefficient used in the transformation.
  * @param gamma The gamma coefficient used in the transformation.
  * @param delta The delta coefficient used in the transformation.
  * @param alpha The alpha coefficient used in the transformation.
- * @param coefficients A pointer to the array of polynomial coefficients.
- * @return A pointer to an array containing the transformed polynomial
- * coefficients.
+ * @param coefficients A pointer to the array of polynomial coefficients to be transformed.
+ * @return A pointer to an array containing the transformed polynomial coefficients.
  */
-double *transform_polynomial(int Order, double beta, double gamma, double delta,
-                             double alpha, double *coefficients)
+double *transform_polynomial(int Order, double beta, double gamma, double delta, double alpha, double *coefficients)
 {
+    // Allocate memory for the arrays used in the transformation
     double *beta_powers = malloc((Order + 1) * sizeof(double));
     double *gamma_powers = malloc((Order + 1) * sizeof(double));
     double *transformed_coefficients = malloc((Order + 1) * sizeof(double));
 
+    // Check for memory allocation failures
     if (!beta_powers || !gamma_powers || !transformed_coefficients) {
         fprintf(stderr, "Memory allocation failed.\n");
         free(beta_powers);
@@ -33,10 +35,10 @@ double *transform_polynomial(int Order, double beta, double gamma, double delta,
         return NULL;
     }
 
-    // Initialize the first powers to 1
+    // Initialize the first powers of beta and gamma to 1
     beta_powers[0] = gamma_powers[0] = 1.0;
 
-    // Compute powers of beta and gamma
+    // Compute the powers of beta and gamma for the transformation
     for (int j = 1; j <= Order; j++) {
         beta_powers[j] = beta * beta_powers[j - 1];
         gamma_powers[j] = gamma * gamma_powers[j - 1];
@@ -45,52 +47,51 @@ double *transform_polynomial(int Order, double beta, double gamma, double delta,
     // Perform the polynomial transformation
     for (int k = 0; k < Order; k++) {
         double sum = 0.0;
-
         for (int j = 0; j <= Order - k; j++) {
-            coefficients[j] = ((Order - k - j) * delta * coefficients[j] +
-                               (j + 1) * alpha * coefficients[j + 1]) /
-                              (k + 1);
+            coefficients[j] = ((Order - k - j) * delta * coefficients[j] + (j + 1) * alpha * coefficients[j + 1]) / (k + 1);
             sum += beta_powers[j] * gamma_powers[Order - k - j] * coefficients[j];
         }
-
         transformed_coefficients[Order - k] = sum;
     }
 
-    // Process the last coefficient
+    // Handle the last coefficient
     transformed_coefficients[0] = coefficients[0];
 
-    // Free dynamically allocated memory for powers
+    // Free dynamically allocated memory
     free(beta_powers);
     free(gamma_powers);
 
-    // Return the array of transformed coefficients
+    // Return the array containing transformed coefficients
     return transformed_coefficients;
 }
 
 /**
- * @brief Transforms an analog filter to a digital filter using bilinear
- * transformation.
+ * @brief Transforms an analog filter to a digital filter using bilinear transformation.
  *
- * @param pa A pointer to the AnalogFilter struct.
- * @return A pointer to the DigitalFilter struct.
+ * This function converts the analog Butterworth filter into its digital equivalent.
+ *
+ * @param pa Pointer to the AnalogFilter structure.
+ * @return Pointer to the DigitalFilter structure.
  */
 DigitalFilter *transform_analog_to_digital(AnalogFilter *pa)
 {
+    // Allocate memory for the DigitalFilter structure
     DigitalFilter *p_d = malloc(sizeof(DigitalFilter));
-
     if (!p_d) {
         fprintf(stderr, "Memory allocation failed.\n");
         return NULL;
     }
 
-    p_d->b_k =
-        transform_polynomial(pa->order_numerator, -1.0, 1.0, 1.0, 1.0, pa->b_k);
-    p_d->a_k =
-        transform_polynomial(pa->order_denominator, -1.0, 1.0, 1.0, 1.0, pa->a_k);
+    // Perform polynomial transformation for numerator and denominator
+    p_d->b_k = transform_polynomial(pa->order_numerator, -1.0, 1.0, 1.0, 1.0, pa->b_k);
+    p_d->a_k = transform_polynomial(pa->order_denominator, -1.0, 1.0, 1.0, 1.0, pa->a_k);
+
+    // Store sizes of the polynomial coefficients
     p_d->size_a = pa->size_a;
     p_d->size_b = pa->size_b;
 
-    if (p_d->b_k == NULL || p_d->a_k == NULL) {
+    // Check if the transformation has failed
+    if (!p_d->b_k || !p_d->a_k) {
         free(p_d);
         fprintf(stderr, "Polynomial transformation failed.\n");
         return NULL;
@@ -101,13 +102,21 @@ DigitalFilter *transform_analog_to_digital(AnalogFilter *pa)
 
 /**
  * @brief Test function for analog-to-digital filter transformation.
+ *
+ * This function performs a test by generating an analog filter and transforming it
+ * into a digital filter using the bilinear transformation method.
  */
 void test_analog_to_digital()
 {
     int order = 5;
     AnalogFilter *p = generate_analog_filter(order, 0.5, BUTTERWORTH, LOWPASS);
 
-    // Print analog coefficients
+    if (!p) {
+        fprintf(stderr, "Failed to generate the analog filter.\n");
+        return;
+    }
+
+    // Print the coefficients of the analog filter
     printf("Analog filter coefficients (a_k) and (b_k):\n");
     for (size_t i = 0; i < p->size_a; i++) {
         printf("analog: ak%zu %.20f\n", i, p->a_k[i]);
@@ -116,20 +125,15 @@ void test_analog_to_digital()
         printf("analog: bk%zu %.20f\n", i, p->b_k[i]);
     }
 
-    if (!p) {
-        fprintf(stderr, "Failed to generate analog filters.\n");
+    // Perform the analog to digital transformation
+    DigitalFilter *p_d = transform_analog_to_digital(p);
+
+    if (!p_d) {
         free_analog_filter(p);
         return;
     }
 
-    DigitalFilter *p_d = transform_analog_to_digital(p);
-
-    if (!p_d) {
-        free_digital_filter(p_d);
-        return;
-    }
-
-    // Print digital coefficients
+    // Print the coefficients of the digital filter
     printf("Digital filter coefficients (a_k and b_k):\n");
     for (size_t i = 0; i < p_d->size_a; i++) {
         printf("digital: ak%zu %.20f\n", i, p_d->a_k[i]);
@@ -138,10 +142,11 @@ void test_analog_to_digital()
         printf("digital: bk%zu %.20f\n", i, p_d->b_k[i]);
     }
 
+    // Normalize coefficients by b_0
     normalize_to_b0(p_d);
 
-    // Print digital coefficients
-    printf("Digital filter coefficients (a_k and b_k):\n");
+    // Print the normalized digital filter coefficients
+    printf("Normalized Digital filter coefficients (a_k and b_k):\n");
     for (size_t i = 0; i < p_d->size_a; i++) {
         printf("digital: ak%zu %.32f\n", i, p_d->a_k[i]);
     }
