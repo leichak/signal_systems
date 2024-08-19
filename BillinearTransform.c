@@ -108,53 +108,37 @@ DigitalFilter *transform_analog_to_digital(AnalogFilter *pa)
  */
 void test_analog_to_digital()
 {
-    int order = 5;
-    AnalogFilter *p = generate_analog_filter(order, 0.5, BUTTERWORTH, HIGHPASS);
+    for (size_t order = 1; order < 10; order++) {
+        for (size_t band = 0; band < 2; band++) {
+            printf("Order %d Type %d Band %d \n", order, BUTTERWORTH, band);
+            AnalogFilter *p = generate_analog_filter(order, 0.5, BUTTERWORTH, band);
 
-    if (!p) {
-        fprintf(stderr, "Failed to generate the analog filter.\n");
-        return;
-    }
+            if (!p) {
+                fprintf(stderr, "Failed to generate the analog filter.\n");
+                return;
+            }
 
-    // Print the coefficients of the analog filter
-    printf("Analog filter coefficients (a_k) and (b_k):\n");
-    for (size_t i = 0; i < p->size_a; i++) {
-        printf("analog: ak%zu %.20f\n", i, p->a_k[i]);
-    }
-    for (size_t i = 0; i < p->size_b; i++) {
-        printf("analog: bk%zu %.20f\n", i, p->b_k[i]);
-    }
+            // Perform the analog to digital transformation
+            DigitalFilter *p_d = transform_analog_to_digital(p);
 
-    // Perform the analog to digital transformation
-    DigitalFilter *p_d = transform_analog_to_digital(p);
+            if (!p_d) {
+                free_analog_filter(p);
+                return;
+            }
+            // Normalize coefficients by b_0
+            normalize_to_b0(p_d);
 
-    if (!p_d) {
-        free_analog_filter(p);
-        return;
+            // Print the normalized digital filter coefficients
+            printf("\tNormalized Digital filter coefficients (a_k and b_k):\n");
+            for (size_t i = 0; i < p_d->size_a; i++) {
+                printf("\tak%zu %.32f\n", i, p_d->a_k[i]);
+            }
+            for (size_t i = 0; i < p_d->size_b; i++) {
+                printf("\tbk%zu %.32f\n", i, p_d->b_k[i]);
+            }
+            // Free allocated memory
+            free_analog_filter(p);
+            free_digital_filter(p_d);
+        }
     }
-
-    // Print the coefficients of the digital filter
-    printf("Digital filter coefficients (a_k and b_k):\n");
-    for (size_t i = 0; i < p_d->size_a; i++) {
-        printf("digital: ak%zu %.20f\n", i, p_d->a_k[i]);
-    }
-    for (size_t i = 0; i < p_d->size_b; i++) {
-        printf("digital: bk%zu %.20f\n", i, p_d->b_k[i]);
-    }
-
-    // Normalize coefficients by b_0
-    normalize_to_b0(p_d);
-
-    // Print the normalized digital filter coefficients
-    printf("Normalized Digital filter coefficients (a_k and b_k):\n");
-    for (size_t i = 0; i < p_d->size_a; i++) {
-        printf("digital: ak%zu %.32f\n", i, p_d->a_k[i]);
-    }
-    for (size_t i = 0; i < p_d->size_b; i++) {
-        printf("digital: bk%zu %.32f\n", i, p_d->b_k[i]);
-    }
-
-    // Free allocated memory
-    free_analog_filter(p);
-    free_digital_filter(p_d);
 }
