@@ -25,5 +25,6 @@ int main()
 
     // Test calls
     test_generate_filters();
-    //   test_analog_to_digital();
+    test_various_orders_filters();
+    // test_analog_to_digital();
 }

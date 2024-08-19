@@ -129,4 +129,11 @@ void normalize_to_max(AnalogFilter *p);
  */
 void test_generate_filters();
 
+/**
+ * @brief Test function for generating various analog filters.
+ *
+ * This function is useful for validating filter generation logic.
+ */
+void test_various_orders_filters();
+
 #endif // ANALOGFILTERS_H

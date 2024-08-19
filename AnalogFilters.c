@@ -213,3 +213,17 @@ void test_generate_filters()
 
     free_analog_filter(p);
 }
+
+void test_various_orders_filters()
+{
+    for (size_t order = 2; order < 10; order++) {
+        printf("Order %d", order);
+        AnalogFilter *p = generate_analog_filter(order, 0.5, BUTTERWORTH, HIGHPASS);
+
+        for (size_t i = 0; i < p->size_a; i++) {
+            printf("\tg0 %.10f a_k%zu %.20f \n", p->g_0, i, p->a_k[i]);
+        }
+
+        free_analog_filter(p);
+    }
+}
