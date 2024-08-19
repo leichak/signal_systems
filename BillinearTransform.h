@@ -48,4 +48,4 @@ double *transform_polynomial(int Order, double beta, double gamma, double delta,
  */
 void test_analog_to_digital();
 
-#endif  // BILINEARTRANSFORM_H
+#endif // BILINEARTRANSFORM_H

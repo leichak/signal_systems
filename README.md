@@ -1,5 +1,9 @@
 ## This library provides production ready concepts related to digital signal processing in audio. 
 
+TODO:
+   - write converting functions for analog filters
+   - 
+
 
 ## Code of conduct.
 

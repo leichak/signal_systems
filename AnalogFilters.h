@@ -5,7 +5,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef enum { BUTTERWORTH = 1 } FilterTypes;
+typedef enum
+{
+    BUTTERWORTH = 0
+} FilterTypes;
+
+typedef enum
+{
+    LOWPASS = 0,
+    HIGHPASS = 1,
+    BANDPASS = 2,
+    BANDSTOP = 3
+} BandType;
 
 /**
  * @brief Calculate the linear gain of an nth-order Butterworth lowpass filter.
@@ -32,14 +43,15 @@ float butter_gain_low_pass_log10(int n, float g0, float wc, float w);
 /**
  * @brief Structure to represent an analog Butterworth filter.
  */
-typedef struct {
-  double *a_k;            ///< Coefficients of the denominator polynomial.
-  double *b_k;            ///< Coefficients of the numerator polynomial.
-  double g_0;             ///< DC gain.
-  int size_a;             ///< Number of coefficients in the denominator.
-  int size_b;             ///< Number of coefficients in the numerator.
-  int order_numerator;    ///< Order of numerator
-  int order_denominator;  ///< Order of denominator
+typedef struct
+{
+    double *a_k;           ///< Coefficients of the denominator polynomial.
+    double *b_k;           ///< Coefficients of the numerator polynomial.
+    double g_0;            ///< DC gain.
+    int size_a;            ///< Number of coefficients in the denominator.
+    int size_b;            ///< Number of coefficients in the numerator.
+    int order_numerator;   ///< Order of numerator
+    int order_denominator; ///< Order of denominator
 } AnalogFilter;
 
 /** @brief Generate butterworth
@@ -84,6 +96,14 @@ AnalogFilter *generate_analog_filter(int n, FilterTypes filter_type);
 void transform_to_wc(AnalogFilter *p, double wc);
 
 /**
+ * @brief Transform analog from lowpass to highpass
+ *
+ * @param p Pointer to the AnalogFilter structure.
+ * @param wc Desired cutoff frequency.
+ */
+void transform_to_wc(AnalogFilter *p, double wc);
+
+/**
  * @brief Normalize the coefficients of the numerator and denominator to a
  * maximum value.
  *
@@ -113,4 +133,4 @@ void test_coefficients_butter_sum_form_poles_coefficients();
  */
 void test_transform_wc();
 
-#endif  // ANALOGFILTERS_H
+#endif // ANALOGFILTERS_H

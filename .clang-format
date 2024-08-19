@@ -1,0 +1,10 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 0
+AllowShortEnumsOnASingleLine: false  # Wraps enum items to separate lines
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: true  # Opens braces on a new line after enums
+  AfterFunction: true
+  AfterStruct: true
+  AfterUnion: true
