@@ -160,15 +160,15 @@ void transform_to_high_pass(AnalogFilter *p, double wc)
     }
 
     // Reverse the orders (required for high-pass transformation)
-    for (int i = 0, j = p->size_a - 1; i < j || i != j; i++, j--) {
-        double t = a[j];
-        a[j] = a[i];
-        a[i] = t;
-    }
-    for (int i = 0, j = p->size_b - 1; i < j || i != j; i++, j--) {
+    for (int i = 0, j = p->size_b - 1; i < j && i != j; i++, j--) {
         double t = b[j];
         b[j] = b[i];
         b[i] = t;
+    }
+    for (int i = 0, j = p->size_a - 1; i < j && i != j; i++, j--) {
+        double t = a[j];
+        a[j] = a[i];
+        a[i] = t;
     }
 
     free(p->a_k);
