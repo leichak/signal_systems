@@ -85,7 +85,7 @@ void butterworth_coefficients(int order, double *coefficients);
  * @param n Order of the filter (number of poles).
  * @return Pointer to an AnalogFilter structure.
  */
-AnalogFilter *generate_analog_filter(int n, FilterTypes filter_type);
+AnalogFilter *generate_analog_filter(int n, double wc, FilterTypes filter_type, BandType band_type);
 
 /**
  * @brief Transform the Butterworth filter to have a specified cutoff frequency.
@@ -93,7 +93,7 @@ AnalogFilter *generate_analog_filter(int n, FilterTypes filter_type);
  * @param p Pointer to the AnalogFilter structure.
  * @param wc Desired cutoff frequency.
  */
-void transform_to_wc(AnalogFilter *p, double wc);
+void transform_to_low_pass(AnalogFilter *p, double wc);
 
 /**
  * @brief Transform analog from lowpass to highpass
@@ -101,7 +101,9 @@ void transform_to_wc(AnalogFilter *p, double wc);
  * @param p Pointer to the AnalogFilter structure.
  * @param wc Desired cutoff frequency.
  */
-void transform_to_wc(AnalogFilter *p, double wc);
+void transform_to_high_pass(AnalogFilter *p, double wc);
+
+// TODO - transform_to_band_pass, transform_to_band_stop
 
 /**
  * @brief Normalize the coefficients of the numerator and denominator to a
@@ -112,25 +114,8 @@ void transform_to_wc(AnalogFilter *p, double wc);
 void normalize_to_max(AnalogFilter *p);
 
 /**
- * @brief Generate an analog Butterworth filter prototype with a specified
- * cutoff frequency.
- *
- * @param n Order of the filter (number of poles).
- * @param wc Cutoff frequency in radians per second.
- * @return Pointer to an AnalogFilter structure.
+ * @brief Test for generating various filters
  */
-AnalogFilter *generate_analog_filter_wc(int n, double wc,
-                                        FilterTypes filter_type);
+void test_generate_filters();
 
-/**
- * @brief Test generated coefficients for Butterworth analog filter.
- */
-void test_coefficients_butter_sum_form_poles_coefficients();
-
-/**
- * @brief Test the transformation of Butterworth coefficients with a specified
- * cutoff frequency.
- */
-void test_transform_wc();
-
-#endif // ANALOGFILTERS_H
+#endif

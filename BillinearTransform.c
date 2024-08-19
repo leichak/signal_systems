@@ -105,7 +105,7 @@ DigitalFilter *transform_analog_to_digital(AnalogFilter *pa)
 void test_analog_to_digital()
 {
     int order = 5;
-    AnalogFilter *p = generate_analog_filter(order, BUTTERWORTH);
+    AnalogFilter *p = generate_analog_filter(order, 0.5, BUTTERWORTH, LOWPASS);
 
     // Print analog coefficients
     printf("Analog filter coefficients (a_k) and (b_k):\n");
