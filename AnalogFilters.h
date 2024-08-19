@@ -2,8 +2,8 @@
 #define ANALOGFILTERS_H
 
 #include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /**
  * @brief Calculate the linear gain of an nth-order Butterworth lowpass filter.
@@ -30,13 +30,12 @@ float butter_gain_low_pass_log10(int n, float g0, float wc, float w);
 /**
  * @brief Structure to represent an analog Butterworth filter.
  */
-typedef struct
-{
-    double *a_k; ///< Coefficients of the denominator polynomial.
-    double *b_k; ///< Coefficients of the numerator polynomial.
-    double g_0;  ///< DC gain.
-    int size_a;  ///< Number of coefficients in the denominator.
-    int size_b;  ///< Number of coefficients in the numerator.
+typedef struct {
+  double *a_k;  ///< Coefficients of the denominator polynomial.
+  double *b_k;  ///< Coefficients of the numerator polynomial.
+  double g_0;   ///< DC gain.
+  int size_a;   ///< Number of coefficients in the denominator.
+  int size_b;   ///< Number of coefficients in the numerator.
 } AnalogFilter;
 
 /**
@@ -47,12 +46,17 @@ typedef struct
 void free_analog_filter(AnalogFilter *p);
 
 /**
- * @brief Recursively generate the coefficients for the Butterworth polynomial in sum form.
+ * @brief Computes Butterworth polynomial coefficients using the recursive and
+ * product formulas.
  *
- * @param a_k Pointer to the array where coefficients will be stored.
- * @param length Number of coefficients to generate.
+ * This function computes the coefficients of the Butterworth polynomial by
+ * applying the recursive and product formulas you've provided.
+ *
+ * @param order The order of the Butterworth filter.
+ * @param coefficients Output array where the computed coefficients will be
+ * stored. The size of the array should be `order + 1`.
  */
-void butter_sum_form_poles_coefficients(double *a_k, int length);
+void butterworth_coefficients(int order, double *coefficients);
 
 /**
  * @brief Generate an analog Butterworth filter prototype.
@@ -71,14 +75,16 @@ AnalogFilter *generate_analog_filter(int n);
 void transform_to_wc(AnalogFilter *p, double wc);
 
 /**
- * @brief Normalize the coefficients of the numerator and denominator to a maximum value.
+ * @brief Normalize the coefficients of the numerator and denominator to a
+ * maximum value.
  *
  * @param p Pointer to the AnalogFilter structure.
  */
 void normalize_to_max(AnalogFilter *p);
 
 /**
- * @brief Generate an analog Butterworth filter prototype with a specified cutoff frequency.
+ * @brief Generate an analog Butterworth filter prototype with a specified
+ * cutoff frequency.
  *
  * @param n Order of the filter (number of poles).
  * @param wc Cutoff frequency in radians per second.
@@ -92,8 +98,9 @@ AnalogFilter *generate_analog_filter_wc(int n, double wc);
 void test_coefficients_butter_sum_form_poles_coefficients();
 
 /**
- * @brief Test the transformation of Butterworth coefficients with a specified cutoff frequency.
+ * @brief Test the transformation of Butterworth coefficients with a specified
+ * cutoff frequency.
  */
 void test_transform_wc();
 
-#endif // ANALOGFILTERS_H
+#endif  // ANALOGFILTERS_H

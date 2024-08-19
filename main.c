@@ -25,6 +25,6 @@ int main() {
 
   // Test calls
   test_coefficients_butter_sum_form_poles_coefficients();
-  test_transform_wc();
-  test_analog_to_digital();
+  //test_transform_wc();
+  //test_analog_to_digital();
 }

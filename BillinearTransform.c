@@ -99,14 +99,12 @@ DigitalFilter *transform_analog_to_digital(AnalogFilter *pa) {
  * @brief Test function for analog-to-digital filter transformation.
  */
 void test_analog_to_digital() {
-  int order = 1;
+  int order = 10;
   AnalogFilter *p = generate_analog_filter(order);
-  AnalogFilter *p_wc = generate_analog_filter_wc(order, 0.2);
 
-  if (!p || !p_wc) {
+  if (!p) {
     fprintf(stderr, "Failed to generate analog filters.\n");
     free_analog_filter(p);
-    free_analog_filter(p_wc);
     return;
   }
 
@@ -114,27 +112,28 @@ void test_analog_to_digital() {
 
   if (!p_d) {
     free_analog_filter(p);
-    free_analog_filter(p_wc);
     return;
   }
 
   // Print analog coefficients
   printf("Analog filter coefficients (a_k):\n");
   for (size_t i = 0; i < p->size_a; i++) {
-    printf("analog: ak%zu %.4f\n", i, p->a_k[i]);
+    printf("analog: ak%zu %.10f\n", i, p->a_k[i]);
+  }
+  for (size_t i = 0; i < p->size_b; i++) {
+    printf("analog: bk%zu %.10f\n", i, p->b_k[i]);
   }
 
   // Print digital coefficients
   printf("Digital filter coefficients (a_k and b_k):\n");
   for (size_t i = 0; i < p_d->size_a; i++) {
-    printf("digital: ak%zu %.4f\n", i, p_d->a_k[i]);
+    printf("digital: ak%zu %.10f\n", i, p_d->a_k[i]);
   }
   for (size_t i = 0; i < p_d->size_b; i++) {
-    printf("digital: bk%zu %.4f\n", i, p_d->b_k[i]);
+    printf("digital: bk%zu %.10f\n", i, p_d->b_k[i]);
   }
 
   // Free allocated memory
   free_analog_filter(p);
-  free_analog_filter(p_wc);
   free_digital_filter(p_d);
 }
