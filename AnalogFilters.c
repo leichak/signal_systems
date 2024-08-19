@@ -1,5 +1,7 @@
 #include "AnalogFilters.h"
 
+#include <assert.h>
+
 float butter_gain_low_pass(int n, float g0, float wc, float w) {
   return (pow(g0, 2) / (1 + pow((w / wc), 2 * n)));
 }
@@ -50,12 +52,23 @@ void butterworth_coefficients(int order, double *coefficients) {
   }
 }
 
-AnalogFilter *generate_analog_filter(int n) {
+AnalogFilter *generate_analog_filter(int n, FilterTypes filter_type) {
   AnalogFilter *f = (AnalogFilter *)malloc(sizeof(AnalogFilter));
   if (f == NULL) return NULL;
 
+  switch (filter_type) {
+    case BUTTERWORTH:
+      assert(generate_butterworth(n, f));
+  }
+
+  return f;
+}
+
+void *generate_butterworth(int n, AnalogFilter *f) {
   f->g_0 = 1.0;
-  f->size_b = 1;
+  f->order_denominator = n;
+  f->order_numerator = 0;
+  f->size_b = f->order_numerator + 1;
   f->b_k = (double *)malloc(f->size_b * sizeof(double));
   if (f->b_k == NULL) {
     free(f);
@@ -71,8 +84,6 @@ AnalogFilter *generate_analog_filter(int n) {
     return NULL;
   }
   butterworth_coefficients(n, f->a_k);
-
-  return f;
 }
 
 void transform_to_wc(AnalogFilter *p, double wc) {
@@ -100,9 +111,10 @@ void normalize_to_max(AnalogFilter *p) {
   }
 }
 
-AnalogFilter *generate_analog_filter_wc(int n, double wc) {
+AnalogFilter *generate_analog_filter_wc(int n, double wc,
+                                        FilterTypes filter_type) {
   AnalogFilter *f = (AnalogFilter *)malloc(sizeof(AnalogFilter));
-  f = generate_analog_filter(n);
+  f = generate_analog_filter(n, filter_type);
   transform_to_wc(f, wc);
 
   return f;
@@ -110,7 +122,7 @@ AnalogFilter *generate_analog_filter_wc(int n, double wc) {
 
 void test_coefficients_butter_sum_form_poles_coefficients() {
   int order = 10;
-  AnalogFilter *p = generate_analog_filter(order);
+  AnalogFilter *p = generate_analog_filter(order, BUTTERWORTH);
 
   if (p == NULL) {
     printf("Failed to allocate");
@@ -125,7 +137,7 @@ void test_coefficients_butter_sum_form_poles_coefficients() {
 void test_transform_wc() {
   int order = 4;
   double ref5[5] = {1.0, 2.6131, 3.4142, 2.6131, 1.0};
-  AnalogFilter *p = generate_analog_filter(order);
+  AnalogFilter *p = generate_analog_filter(order, BUTTERWORTH);
   transform_to_wc(p, 0.8);
   normalize_to_max(p);
 

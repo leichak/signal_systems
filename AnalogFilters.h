@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef enum { BUTTERWORTH = 1 } FilterTypes;
+
 /**
  * @brief Calculate the linear gain of an nth-order Butterworth lowpass filter.
  *
@@ -31,12 +33,19 @@ float butter_gain_low_pass_log10(int n, float g0, float wc, float w);
  * @brief Structure to represent an analog Butterworth filter.
  */
 typedef struct {
-  double *a_k;  ///< Coefficients of the denominator polynomial.
-  double *b_k;  ///< Coefficients of the numerator polynomial.
-  double g_0;   ///< DC gain.
-  int size_a;   ///< Number of coefficients in the denominator.
-  int size_b;   ///< Number of coefficients in the numerator.
+  double *a_k;            ///< Coefficients of the denominator polynomial.
+  double *b_k;            ///< Coefficients of the numerator polynomial.
+  double g_0;             ///< DC gain.
+  int size_a;             ///< Number of coefficients in the denominator.
+  int size_b;             ///< Number of coefficients in the numerator.
+  int order_numerator;    ///< Order of numerator
+  int order_denominator;  ///< Order of denominator
 } AnalogFilter;
+
+/** @brief Generate butterworth
+ *
+ */
+void *generate_butterworth(int n, AnalogFilter *f);
 
 /**
  * @brief Free the memory allocated for an AnalogFilter structure.
@@ -64,7 +73,7 @@ void butterworth_coefficients(int order, double *coefficients);
  * @param n Order of the filter (number of poles).
  * @return Pointer to an AnalogFilter structure.
  */
-AnalogFilter *generate_analog_filter(int n);
+AnalogFilter *generate_analog_filter(int n, FilterTypes filter_type);
 
 /**
  * @brief Transform the Butterworth filter to have a specified cutoff frequency.
@@ -90,7 +99,8 @@ void normalize_to_max(AnalogFilter *p);
  * @param wc Cutoff frequency in radians per second.
  * @return Pointer to an AnalogFilter structure.
  */
-AnalogFilter *generate_analog_filter_wc(int n, double wc);
+AnalogFilter *generate_analog_filter_wc(int n, double wc,
+                                        FilterTypes filter_type);
 
 /**
  * @brief Test generated coefficients for Butterworth analog filter.
