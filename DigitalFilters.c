@@ -45,6 +45,23 @@ void normalize_to_b0(DigitalFilter *p)
     }
 }
 
+void normalize_to_b0_causal(DigitalFilterCausal *p)
+{
+    if (p == NULL) {
+        return;
+    }
+
+    double a_0 = p->a_k[p->size_a - 1];
+
+    for (size_t i = 0; i < p->size_a; i++) {
+        p->a_k[i] /= a_0;
+    }
+
+    for (size_t i = 0; i < p->size_b; i++) {
+        p->b_k[i] /= a_0;
+    }
+}
+
 DigitalFilterCausal *make_causal(DigitalFilter *p)
 {
     if (!p) {
@@ -95,12 +112,14 @@ void test_make_causal()
                 return;
             }
 
+            normalize_to_b0_causal(p_d_c);
+
             printf("\tNormalized Causal Digital filter coefficients (a_k and b_k):\n");
             for (size_t i = 0; i < p_d_c->size_a; i++) {
-                printf("\tak%zu %.32f\n", i, p_d_c->a_k[i]);
+                printf("\tak%zu z^-%zu = %.32f\n", i, p_d_c->size_a - 1 - i, p_d_c->a_k[i]);
             }
             for (size_t i = 0; i < p_d_c->size_b; i++) {
-                printf("\tbk%zu %.32f\n", i, p_d_c->b_k[i]);
+                printf("\tak%zu z^-%zu = %.32f\n", i, p_d_c->size_b - 1 - i, p_d_c->b_k[i]);
             }
 
             free_analog_filter(p);
