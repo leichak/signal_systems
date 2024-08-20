@@ -1,6 +1,6 @@
 #include "DigitalFilters.h"
 #include "AnalogFilters.h"
-#include "BilinearTransform.h"
+#include "BillinearTransform.h"
 #include "Utils.h"
 
 #include <assert.h>
