@@ -2,7 +2,7 @@
 
 #include "AnalogFilters.h"
 #include "BillinearTransform.h"
-#include "utils.h"
+#include "Utils.h"
 
 int main()
 {
@@ -10,4 +10,5 @@ int main()
     test_generate_filters();
     test_various_orders_filters();
     test_analog_to_digital();
+    test_make_causal();
 }

@@ -1,15 +1,10 @@
 #include "AnalogFilters.h"
+#include "Utils.h"
 
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-// Returns the maximum of two integers
-int max_int(int a, int b)
-{
-    return (a > b) ? a : b;
-}
 
 // Computes the Butterworth filter gain for a low-pass filter
 float butter_gain_low_pass(int n, float g0, float wc, float w)

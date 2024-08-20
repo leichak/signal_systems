@@ -1,48 +1,111 @@
 #include "DigitalFilters.h"
+#include "AnalogFilters.h"
+#include "BilinearTransform.h"
+#include "Utils.h"
 
-/**
- * @brief Frees the memory allocated for the digital filter structure.
- *
- * This function deallocates the memory used by the `DigitalFilter` structure,
- * including the memory allocated for the coefficients of the numerator
- * and denominator polynomials.
- *
- * @param p Pointer to the `DigitalFilter` structure to be freed.
- */
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 void free_digital_filter(DigitalFilter *p)
 {
     if (p != NULL) {
-        free(p->a_k); // Free memory allocated for a_k coefficients
-        free(p->b_k); // Free memory allocated for b_k coefficients
-
-        // Optional: nullify pointers to avoid dangling references
+        free(p->a_k);
+        free(p->b_k);
         p->a_k = NULL;
         p->b_k = NULL;
     }
 }
 
-/**
- * @brief Normalizes the digital filter coefficients based on the first denominator coefficient (a0).
- *
- * This function normalizes the coefficients of the digital filter by dividing
- * all coefficients by the value of `a0` (the first coefficient of the
- * denominator polynomial). This is necessary to ensure the filter's scalability
- * with respect to `a0`.
- *
- * @param p Pointer to the `DigitalFilter` structure to be normalized.
- */
+void free_causal_digital_filter(DigitalFilterCausal *p)
+{
+    if (p != NULL) {
+        free(p->a_k);
+        free(p->b_k);
+        p->a_k = NULL;
+        p->b_k = NULL;
+    }
+}
+
 void normalize_to_b0(DigitalFilter *p)
 {
-    if (p == NULL)
-        return; // Early return if the pointer is NULL
+    if (p == NULL) {
+        return;
+    }
 
-    double a_0 = p->a_k[0]; // Retrieve the first coefficient of the denominator polynomial
+    double a_0 = p->a_k[0];
 
     for (size_t i = 0; i < p->size_a; i++) {
-        p->a_k[i] /= a_0; // Normalize each denominator coefficient by a_0
+        p->a_k[i] /= a_0;
     }
 
     for (size_t i = 0; i < p->size_b; i++) {
-        p->b_k[i] /= a_0; // Normalize each numerator coefficient by a_0
+        p->b_k[i] /= a_0;
+    }
+}
+
+DigitalFilterCausal *make_causal(DigitalFilter *p)
+{
+    if (!p) {
+        return NULL;
+    }
+
+    DigitalFilterCausal *p_d_c = (DigitalFilterCausal *)malloc(sizeof(DigitalFilterCausal));
+    assert(p_d_c != NULL);
+
+    size_t max_size = p->size_a > p->size_b ? p->size_a : p->size_b;
+    p_d_c->a_k = (double *)calloc(max_size, sizeof(double));
+    p_d_c->b_k = (double *)calloc(max_size, sizeof(double));
+    assert(p_d_c->a_k != NULL && p_d_c->b_k != NULL);
+
+    memcpy(p_d_c->a_k, p->a_k, sizeof(double) * p->size_a);
+    memcpy(p_d_c->b_k, p->b_k, sizeof(double) * p->size_b);
+
+    p_d_c->size_a = max_size;
+    p_d_c->size_b = max_size;
+
+    return p_d_c;
+}
+
+void test_make_causal()
+{
+    for (size_t order = 1; order < 10; order++) {
+        for (size_t band = 0; band < 2; band++) {
+            printf("Order %zu Type %d Band %zu\n", order, BUTTERWORTH, band);
+
+            AnalogFilter *p = generate_analog_filter(order, 0.5, BUTTERWORTH, band);
+            if (!p) {
+                fprintf(stderr, "Failed to generate the analog filter.\n");
+                return;
+            }
+
+            DigitalFilter *p_d = transform_analog_to_digital(p);
+            if (!p_d) {
+                free_analog_filter(p);
+                return;
+            }
+
+            normalize_to_b0(p_d);
+
+            DigitalFilterCausal *p_d_c = make_causal(p_d);
+            if (!p_d_c) {
+                free_analog_filter(p);
+                free_digital_filter(p_d);
+                return;
+            }
+
+            printf("\tNormalized Causal Digital filter coefficients (a_k and b_k):\n");
+            for (size_t i = 0; i < p_d_c->size_a; i++) {
+                printf("\tak%zu %.32f\n", i, p_d_c->a_k[i]);
+            }
+            for (size_t i = 0; i < p_d_c->size_b; i++) {
+                printf("\tbk%zu %.32f\n", i, p_d_c->b_k[i]);
+            }
+
+            free_analog_filter(p);
+            free_digital_filter(p_d);
+            free_causal_digital_filter(p_d_c);
+        }
     }
 }
