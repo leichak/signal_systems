@@ -47,6 +47,7 @@ typedef struct
  * (or the low-frequency limit for low-pass filters) is properly adjusted.
  */
 void normalize_to_b0(DigitalFilter *p);
+void normalize_to_b0_causal(DigitalFilterCausal *p);
 
 /**
  * @brief Multiplies filter with the highest polynomial degree with negative power for causality.
@@ -66,8 +67,24 @@ DigitalFilterCausal *make_causal(DigitalFilter *p);
  * to refer to the filter without reinitializing it.
  */
 void free_digital_filter(DigitalFilter *p);
+
+/**
+ * @brief Frees the memory allocated for the digital filter structure.
+ *
+ * This function deallocates the memory used by the `DigitalFilterCausal` structure,
+ * including the memory for the coefficients of the numerator and denominator
+ * polynomials.
+ *
+ * @param p A pointer to the `DigitalFilterCausal` structure to be freed.
+ *
+ * After calling this function, the pointer `p` should no longer be used
+ * to refer to the filter without reinitializing it.
+ */
 void free_causal_digital_filter(DigitalFilterCausal *p);
 
-void test_make_causal();
+/**
+ *
+ */
+void frequency_response_causal_digital_filter(DigitalFilterCausal *p, double *freq, int n);
 
 #endif // DIGITALFILTERS_H

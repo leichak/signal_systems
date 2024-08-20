@@ -40,13 +40,4 @@ DigitalFilter *transform_analog_to_digital(AnalogFilter *p);
  */
 double *transform_polynomial(int Order, double beta, double gamma, double delta, double alpha, double *coefficients);
 
-/**
- * @brief Test function for validating the analog-to-digital filter transformation.
- *
- * This function tests the `transform_analog_to_digital()` function by generating an analog filter,
- * transforming it to a digital filter, and then outputting the filter coefficients. It is used
- * to ensure that the transformation process is working as expected.
- */
-void test_analog_to_digital();
-
 #endif // BILINEARTRANSFORM_H

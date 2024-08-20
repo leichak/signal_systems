@@ -122,18 +122,5 @@ void transform_to_high_pass(AnalogFilter *p, double wc);
  */
 void normalize_to_max(AnalogFilter *p);
 
-/**
- * @brief Test function for generating various analog filters.
- *
- * This function is useful for validating filter generation logic.
- */
-void test_generate_filters();
-
-/**
- * @brief Test function for generating various analog filters.
- *
- * This function is useful for validating filter generation logic.
- */
-void test_various_orders_filters();
 
 #endif // ANALOGFILTERS_H

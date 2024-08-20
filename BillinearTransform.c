@@ -64,38 +64,3 @@ DigitalFilter *transform_analog_to_digital(AnalogFilter *pa)
 
     return p_d;
 }
-
-void test_analog_to_digital()
-{
-    for (size_t order = 1; order < 10; order++) {
-        for (size_t band = 0; band < 2; band++) {
-            printf("Order %d Type %d Band %d \n", order, BUTTERWORTH, band);
-            AnalogFilter *p = generate_analog_filter(order, 0.5, BUTTERWORTH, band);
-
-            if (!p) {
-                fprintf(stderr, "Failed to generate the analog filter.\n");
-                return;
-            }
-
-            DigitalFilter *p_d = transform_analog_to_digital(p);
-
-            if (!p_d) {
-                free_analog_filter(p);
-                return;
-            }
-
-            normalize_to_b0(p_d);
-
-            printf("\tNormalized Digital filter coefficients (a_k and b_k):\n");
-            for (size_t i = 0; i < p_d->size_a; i++) {
-                printf("\tak%zu %.32f\n", i, p_d->a_k[i]);
-            }
-            for (size_t i = 0; i < p_d->size_b; i++) {
-                printf("\tbk%zu %.32f\n", i, p_d->b_k[i]);
-            }
-
-            free_analog_filter(p);
-            free_digital_filter(p_d);
-        }
-    }
-}

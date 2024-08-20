@@ -194,31 +194,3 @@ void normalize_to_max(AnalogFilter *p)
         p->a_k[i] /= p->g_0;
     }
 }
-
-// Test function for generating analog filters
-void test_generate_filters()
-{
-    int order = 4;
-    double ref5[5] = {1.0, 2.6131, 3.4142, 2.6131, 1.0};
-    AnalogFilter *p = generate_analog_filter(order, 1.0, BUTTERWORTH, LOWPASS);
-
-    for (size_t i = 0; i < p->size_a; i++) {
-        printf("g0 %.10f a_k%zu %.20f ref: %.20f\n", p->g_0, i, p->a_k[i], ref5[i]);
-    }
-
-    free_analog_filter(p);
-}
-
-void test_various_orders_filters()
-{
-    for (size_t order = 1; order < 10; order++) {
-        for (size_t band = 0; band < 2; band++) {
-            printf("Order %d Type %d Band %d \n", order, BUTTERWORTH, band);
-            AnalogFilter *p = generate_analog_filter(order, 0.5, BUTTERWORTH, band);
-            for (size_t i = 0; i < p->size_a; i++) {
-                printf("\tg0 %.10f a_k%zu %.20f \n", p->g_0, i, p->a_k[i]);
-            }
-            free_analog_filter(p);
-        }
-    }
-}

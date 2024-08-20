@@ -1,8 +1,6 @@
 #include <stdio.h>
 
-#include "AnalogFilters.h"
-#include "BillinearTransform.h"
-#include "Utils.h"
+#include "Tests.h"
 
 int main()
 {

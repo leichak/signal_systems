@@ -1,8 +1,12 @@
-## This library provides production ready concepts related to digital signal processing in audio. 
+## This library provides production ready concepts related to digital signal processing in audio.
 
 TODO:
-   - write converting functions for analog filters
-   - 
+   - write converting functions for analog filters - partially DONE
+   - write filtering function for IRRs, write FIR create function
+   - write freq/phase functions for analog and digital
+   - write comparison tests for them
+   - write DIRECT forms
+   - write code for discretization
 
 
 ## Code of conduct.
