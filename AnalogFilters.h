@@ -122,5 +122,9 @@ void transform_to_high_pass(AnalogFilter *p, double wc);
  */
 void normalize_to_max(AnalogFilter *p);
 
+/**
+ *
+ *
+ */
 
 #endif // ANALOGFILTERS_H

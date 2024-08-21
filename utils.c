@@ -7,7 +7,12 @@ int max_int(int a, int b)
     return (a > b) ? a : b;
 }
 
-void fill_n_with_step(float* xs, size_t size, float start, float stop)
+size_t max_size_t(size_t a, size_t b)
+{
+    return (a > b) ? a : b;
+}
+
+void fill_n_with_step(float *xs, size_t size, float start, float stop)
 {
     float step = (stop - start) / (float)(size);
     xs[0] = start;
