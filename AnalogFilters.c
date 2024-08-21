@@ -2,6 +2,7 @@
 #include "Utils.h"
 
 #include <assert.h>
+#include <complex.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -193,4 +194,58 @@ void normalize_to_max(AnalogFilter *p)
     for (int i = 1; i < p->size_a; i++) {
         p->a_k[i] /= p->g_0;
     }
+}
+
+int magnitude_response_analog_filter(AnalogFilter *p, double *magnitudes, int n)
+{
+    double *w_k = (double *)calloc(n, sizeof(double));
+    if (w_k == NULL) {
+        return -1;
+    }
+    fill_n_with_step(w_k, n, -M_PI, M_PI);
+    complex numerator, denominator, hw = 0 * 0.0I;
+    size_t size = max_int(p->size_a, p->size_b);
+    for (size_t i = 0; i < n; i++) {
+        for (size_t k = 0; k < size; i++) { // just calculate
+            if (k < p->size_a)
+                denominator += p->a_k[k] * cexp(k * w_k[i]);
+            if (k < p->size_b)
+                numerator += p->b_k[k] * cexp(k * w_k[i]);
+        }
+        hw = numerator / denominator;
+        double hw_re = creal(hw);
+        double hw_im = cimag(hw);
+        magnitudes[i] = sqrt(powf(hw_re, 2) + powf(hw_im, 2));
+    }
+
+    free(w_k);
+
+    return 0;
+}
+
+int phase_response_analog_filter(AnalogFilter *p, double *phases, int n)
+{
+    double *w_k = (double *)calloc(n, sizeof(double));
+    if (w_k == NULL) {
+        return -1;
+    }
+    fill_n_with_step(w_k, n, -M_PI, M_PI);
+    complex numerator, denominator, hw = 0 * 0.0I;
+    size_t size = max_int(p->size_a, p->size_b);
+    for (size_t i = 0; i < n; i++) {
+        for (size_t k = 0; k < size; i++) { // just calculate
+            if (k < p->size_a)
+                denominator += p->a_k[k] * cexp(k * w_k[i]);
+            if (k < p->size_b)
+                numerator += p->b_k[k] * cexp(k * w_k[i]);
+        }
+        hw = numerator / denominator;
+        double hw_re = creal(hw);
+        double hw_im = cimag(hw);
+        phases[i] = atan(hw_im / hw_re);
+    }
+
+    free(w_k);
+
+    return 0;
 }

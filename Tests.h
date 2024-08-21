@@ -37,4 +37,11 @@ void test_generate_filters();
  */
 void test_various_orders_filters();
 
+/**
+ * @brief Test magnitude response calculation for analog and digital filter
+ *
+ * This function is useful for validating filter characteristics.
+ */
+void test_magnitude_response();
+
 #endif

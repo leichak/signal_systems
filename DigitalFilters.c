@@ -99,15 +99,17 @@ int frequency_response_causal_digital_filter(DigitalFilterCausal *p, double *mag
     for (size_t i = 0; i < n; i++) {
         for (size_t k = 0; k < size; i++) { // just calculate
             if (k < p->size_a)
-                denominator += p->a_k[p->size_a - 1 - 0] * cexp(-k * w_k[i]);
+                denominator += p->a_k[p->size_a - 1 - k] * cexp(-k * w_k[i]);
             if (k < p->size_b)
-                numerator += p->b_k[p->size_b - 1 - 0] * cexp(-k * w_k[i]);
+                numerator += p->b_k[p->size_b - 1 - k] * cexp(-k * w_k[i]);
         }
         hw = numerator / denominator;
         double hw_re = creal(hw);
         double hw_im = cimag(hw);
         magnitudes[i] = sqrt(powf(hw_re, 2) + powf(hw_im, 2));
     }
+
+    free(w_k);
 
     return 0;
 }
@@ -124,15 +126,17 @@ int phase_response_causal_digital_filter(DigitalFilterCausal *p, double *phases,
     for (size_t i = 0; i < n; i++) {
         for (size_t k = 0; k < size; i++) { // just calculate
             if (k < p->size_a)
-                denominator += p->a_k[p->size_a - 1 - 0] * cexp(-k * w_k[i]);
+                denominator += p->a_k[p->size_a - 1 - k] * cexp(-k * w_k[i]);
             if (k < p->size_b)
-                numerator += p->b_k[p->size_b - 1 - 0] * cexp(-k * w_k[i]);
+                numerator += p->b_k[p->size_b - 1 - k] * cexp(-k * w_k[i]);
         }
         hw = numerator / denominator;
         double hw_re = creal(hw);
         double hw_im = cimag(hw);
         phases[i] = atan(hw_im / hw_re);
     }
+
+    free(w_k);
 
     return 0;
 }

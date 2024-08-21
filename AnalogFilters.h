@@ -123,8 +123,21 @@ void transform_to_high_pass(AnalogFilter *p, double wc);
 void normalize_to_max(AnalogFilter *p);
 
 /**
- *
- *
+ * @brief Function calculating magnitude response of causal filter
+ * M(\omega)=|H(e^{j\omega})| is a function of \omega that is called the magnitude response of the amplitude response of the system.
+ * \begin{align*}M(\omega)=\sqrt{\big( \Re \{H(e^{j\omega}) \}\big)^{2}+\big( \Im \{H(e^{j\omega}) \}\big) ^{2}}\end{align*}
+ * reference:
+ * https://aleksandarhaber.com/magnitude-amplitude-and-phase-response-of-discrete-time-systems-and-filters/
  */
+int magnitude_response_analog_filter(AnalogFilter *p, double *magnitudes, int n);
+
+/**
+ * @brief Function calculating phase response of causal filter
+ * phase response is then computed by solving this equation
+ * (7) \begin{align*}\tan \left( \theta (\omega ) \right) = \frac{\Im \{H(e^{j\omega}) \}}{\Re \{H(e^{j\omega}) \}}\end{align*}
+ * reference:
+ * https://aleksandarhaber.com/magnitude-amplitude-and-phase-response-of-discrete-time-systems-and-filters/
+ */
+int phase_response_analog_filter(AnalogFilter *p, double *phases, int n);
 
 #endif // ANALOGFILTERS_H

@@ -112,3 +112,10 @@ void test_various_orders_filters()
         }
     }
 }
+
+void test_magnitude_response()
+{
+    size_t n = 1000;
+    double *mag_analog = (double *)calloc(n, sizeof(double));
+    double *mag_digital = (double *)calloc(n, sizeof(double));
+}
