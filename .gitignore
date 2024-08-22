@@ -1,3 +1,4 @@
 *.txt
 output/
 .vscode
+/tests

@@ -129,7 +129,7 @@ void normalize_to_max(AnalogFilter *p);
  * reference:
  * https://aleksandarhaber.com/magnitude-amplitude-and-phase-response-of-discrete-time-systems-and-filters/
  */
-int magnitude_response_analog_filter(AnalogFilter *p, double *magnitudes, int n);
+double *magnitude_response_analog_filter(AnalogFilter *p, double *magnitudes, int n);
 
 /**
  * @brief Function calculating phase response of causal filter
@@ -138,6 +138,6 @@ int magnitude_response_analog_filter(AnalogFilter *p, double *magnitudes, int n)
  * reference:
  * https://aleksandarhaber.com/magnitude-amplitude-and-phase-response-of-discrete-time-systems-and-filters/
  */
-int phase_response_analog_filter(AnalogFilter *p, double *phases, int n);
+double *phase_response_analog_filter(AnalogFilter *p, double *phases, int n);
 
 #endif // ANALOGFILTERS_H

@@ -44,4 +44,6 @@ void test_various_orders_filters();
  */
 void test_magnitude_response();
 
+int plot_x_y_single(double *xs, double *ys, size_t n);
+
 #endif
