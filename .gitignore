@@ -2,3 +2,4 @@
 output/
 .vscode
 /tests
+signal_systems.code-workspace

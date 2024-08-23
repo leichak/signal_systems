@@ -30,6 +30,8 @@ void test_make_causal();
  */
 void test_generate_filters();
 
+void test_billinear_transform();
+
 /**
  * @brief Test function for generating various analog filters.
  *
@@ -42,8 +44,12 @@ void test_various_orders_filters();
  *
  * This function is useful for validating filter characteristics.
  */
-void test_magnitude_response();
+void test_magnitude_phase_response_analog_digital();
 
-int plot_x_y_single(double *xs, double *ys, size_t n);
+void test_overlay_multiple_lines();
 
+void test_generate_colors();
+
+void test_concat_strings();
+void bilinear_transform(double alpha, double beta, double delta, double gamma, double *r, int Order);
 #endif

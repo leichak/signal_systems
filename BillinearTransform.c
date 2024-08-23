@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-double *transform_polynomial(int Order, double beta, double gamma, double delta, double alpha, double *coefficients)
+double *transform_polynomial(int Order, double beta, double gamma, double delta, double alpha, double *coefficients_original)
 {
     double *beta_powers = malloc((Order + 1) * sizeof(double));
     double *gamma_powers = malloc((Order + 1) * sizeof(double));
     double *transformed_coefficients = malloc((Order + 1) * sizeof(double));
+    double *coefficients = malloc((Order + 1) * sizeof(double));
+    memcpy(coefficients, coefficients_original, sizeof(double) * (Order + 1));
 
     if (!beta_powers || !gamma_powers || !transformed_coefficients) {
         fprintf(stderr, "Memory allocation failed.\n");
@@ -42,7 +44,7 @@ double *transform_polynomial(int Order, double beta, double gamma, double delta,
     return transformed_coefficients;
 }
 
-DigitalFilter *transform_analog_to_digital(AnalogFilter *pa)
+DigitalFilter *transform_analog_to_digital(AnalogFilter *p_a)
 {
     DigitalFilter *p_d = malloc(sizeof(DigitalFilter));
     if (!p_d) {
@@ -50,11 +52,11 @@ DigitalFilter *transform_analog_to_digital(AnalogFilter *pa)
         return NULL;
     }
 
-    p_d->b_k = transform_polynomial(pa->order_numerator, -1.0, 1.0, 1.0, 1.0, pa->b_k);
-    p_d->a_k = transform_polynomial(pa->order_denominator, -1.0, 1.0, 1.0, 1.0, pa->a_k);
+    p_d->b_k = transform_polynomial(p_a->order_numerator, -1.0, 1.0, 1.0, 1.0, p_a->b_k);
+    p_d->a_k = transform_polynomial(p_a->order_denominator, -1.0, 1.0, 1.0, 1.0, p_a->a_k);
 
-    p_d->size_a = pa->size_a;
-    p_d->size_b = pa->size_b;
+    p_d->size_a = p_a->size_a;
+    p_d->size_b = p_a->size_b;
 
     if (!p_d->b_k || !p_d->a_k) {
         free(p_d);

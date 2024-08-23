@@ -203,24 +203,21 @@ double *magnitude_response_analog_filter(AnalogFilter *p, double *magnitudes, in
         return NULL;
     }
     fill_n_with_step(w_k, n, -M_PI, M_PI);
-    double complex numerator, denominator, hw = 0.0 + 0 * I;
+    complex double numerator, denominator, hw = 0 * 0.0I;
     size_t size = max_int(p->size_a, p->size_b);
     for (size_t i = 0; i < n; i++) {
         numerator = 0.0;
         denominator = 0.0;
         for (size_t k = 0; k < size; k++) {
-            if (k < p->size_b)
-                numerator += p->b_k[k] * cpow((w_k[i] / M_PI) * I, (double)(k));
-            //     printf("ekwi %zu \n\tbk %.32f \n\tcreal %.32f \n\tcimag %.32f \n", k, p->b_k[k], creal(cexp(((double)(k)*w_k[i] / M_PI) * I)), cimag(cexp(((double)(k)*w_k[i] / M_PI) * I)));
             if (k < p->size_a)
                 denominator += p->a_k[k] * cpow((w_k[i] / M_PI) * I, (double)(k));
-            //  printf("ekwi %zu \n\tbk %.32f \n\tcreal %.32f \n\tcimag %.32f \n", k, p->a_k[k], creal(cexp(((double)(k)*w_k[i] / M_PI) * I)), cimag(cexp(((double)(k)*w_k[i] / M_PI) * I)));
+            if (k < p->size_b)
+                numerator += p->b_k[k] * cpow((w_k[i] / M_PI) * I, (double)(k));
         }
-        // printf("%f %f \n", creal(numerator), cimag(numerator));
         hw = numerator / denominator;
         double hw_re = creal(hw);
         double hw_im = cimag(hw);
-        magnitudes[i] = sqrt(powf(hw_re, 2) + powf(hw_im, 2));
+        magnitudes[i] = sqrt(pow(hw_re, 2) + pow(hw_im, 2));
     }
 
     return w_k;
@@ -240,9 +237,9 @@ double *phase_response_analog_filter(AnalogFilter *p, double *phases, int n)
         denominator = 0.0;
         for (size_t k = 0; k < size; k++) {
             if (k < p->size_a)
-                denominator += p->a_k[k] * cexp(k * w_k[i] * I);
+                denominator += p->a_k[k] * cpow((w_k[i] / M_PI) * I, (double)(k));
             if (k < p->size_b)
-                numerator += p->b_k[k] * cexp(k * w_k[i] * I);
+                numerator += p->b_k[k] * cpow((w_k[i] / M_PI) * I, (double)(k));
         }
         hw = numerator / denominator;
         double hw_re = creal(hw);

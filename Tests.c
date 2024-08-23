@@ -6,11 +6,9 @@
 #include "BillinearTransform.h"
 #include "DigitalFilters.h"
 #include "Filtering.h"
-#include "PbPlots/pbPlots.h"
-#include "PbPlots/supportLib.h"
 #include "Tests.h"
 
-static char *TEST_IMAGE_OUTPUT_PREFIX = "./tests/images/";
+const char *TEST_IMAGE_OUTPUT_PREFIX = "./tests/images/";
 
 void test_analog_to_digital()
 {
@@ -119,120 +117,196 @@ void test_various_orders_filters()
     }
 }
 
-void test_magnitude_response()
+void test_magnitude_phase_response_analog_digital()
 {
-    size_t n = 100;
-    double *mag_analog = (double *)calloc(n, sizeof(double));
-    double *mag_digital = (double *)calloc(n, sizeof(double));
-    size_t order = 4;
+    size_t n = 400;
+    double *magnitudes_analog = (double *)calloc(n, sizeof(double));
+    double *magnitudes_digital = (double *)calloc(n, sizeof(double));
+    size_t order = 10;
     size_t band = 0;
+    double cutoff = 0.5;
 
     printf("Order %zu Type %d Band %zu\n", order, BUTTERWORTH, band);
 
-    AnalogFilter *p = generate_analog_filter(order, 0.5, BUTTERWORTH, band);
+    AnalogFilter *p = generate_analog_filter(order, cutoff, BUTTERWORTH, band);
     if (!p) {
         fprintf(stderr, "Failed to generate the analog filter.\n");
         return;
     }
 
-    // DigitalFilter *p_d = transform_analog_to_digital(p);
-    // if (!p_d) {
-    //     free_analog_filter(p);
-    //     return;
-    // }
-
-    // normalize_to_b0(p_d);
-
-    // DigitalFilterCausal *p_d_c = make_causal(p_d);
-    // if (!p_d_c) {
-    //     free_analog_filter(p);
-    //     free_digital_filter(p_d);
-    //     return;
-    // }
-
-    // normalize_to_b0_causal(p_d_c);
-
-    // printf("\tNormalized Causal Digital filter coefficients (a_k and b_k):\n");
-    // for (size_t i = 0; i < p_d_c->size_a; i++) {
-    //     printf("\tak%zu z^-%zu = %.32f\n", i, p_d_c->size_a - 1 - i, p_d_c->a_k[i]);
-    // }
-    // for (size_t i = 0; i < p_d_c->size_b; i++) {
-    //     printf("\tak%zu z^-%zu = %.32f\n", i, p_d_c->size_b - 1 - i, p_d_c->b_k[i]);
-    // }
-
-    double *xs1 = magnitude_response_analog_filter(p, mag_analog, n);
-    // double *xs2 = magnitude_response_causal_digital_filter(p_d_c, mag_digital, n);
-
-    // for (size_t k = 0; k < n; k++) {
-    //     printf("%f \n", mag_analog[k]);
-    // }
-
-    if (plot_x_y_single(xs1, mag_analog, n) != 0) {
-        printf("pdf generation failed");
+    DigitalFilter *p_d = transform_analog_to_digital(p);
+    if (p_d == NULL) {
+        free_analog_filter(p);
+        return;
     }
 
-    free(mag_analog);
-    free(mag_digital);
+    normalize_to_b0(p_d);
+
+    DigitalFilterCausal *p_d_c = make_causal(p_d);
+    if (p_d_c == NULL) {
+        free_analog_filter(p);
+        free_digital_filter(p_d);
+        return;
+    }
+
+    normalize_to_b0_causal(p_d_c);
+
+    char *l1 = concat_strings(4, "butter_analog_", "order_4_", "_lowpass", "color");
+    char *l2 = concat_strings(4, "butter_digital_", "order_4_", "_lowpass", "color");
+    char *labels[] = {l1,
+                      l2};
+
+    double *xs1 = magnitude_response_analog_filter(p, magnitudes_analog, n);
+    double *xs2 = magnitude_response_causal_digital_filter(p_d_c, magnitudes_digital, n);
+
+    char mag_filename[] = "analog_vs_digital.png";
+
+    double *yss[] = {magnitudes_digital, magnitudes_digital};
+    double *xss[] = {xs1,
+                     xs1};
+
+    if (plot_x_y_overlay(xss, yss, n, 2, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, mag_filename) != 0) {
+        printf("png generation failed");
+    }
+
+    free(magnitudes_analog);
+    free(magnitudes_digital);
+
     free(xs1);
-    // free(xs2);
+    free(xs2);
 
     free_analog_filter(p);
-    // free_digital_filter(p_d);
-    // free_causal_digital_filter(p_d_c);
+    free_digital_filter(p_d);
+    free_causal_digital_filter(p_d_c);
 }
 
-int plot_x_y_single(double *xs, double *ys, size_t n)
+void test_overlay_multiple_lines()
 {
-    char filename[] = "magnitudes.png";
-    size_t prefix_len = strlen(TEST_IMAGE_OUTPUT_PREFIX);
-    size_t fname_len = strlen(&filename);
-    char path[prefix_len + fname_len];
-    strcpy(path, TEST_IMAGE_OUTPUT_PREFIX);
-    strcat(path, &filename);
+    char filename[] = "overlayed1.png";
+    char *labels[] = {(char *)""};
 
-    _Bool success;
+    size_t n = 6;
+    double ys1[] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double ys2[] = {2.0, 1.0, 0.5, 0.0, 1.0, -1.0};
+    double ys3[] = {5.0, 1.0, 1.5, 0.0, -2.0, -1.0};
+    double ys4[] = {5.0, -0.0, -1.5, 0.0, -2.0, 1.0};
+    double ys5[] = {-10.0, -.3, 0.5, 0.0, -3.0, -1.0};
+    double xs[] = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+    double *xss[] = {xs, xs, xs, xs, xs};
+    double *yss[] = {ys1, ys2, ys3, ys4, ys5};
 
-    StartArenaAllocator();
+    size_t overlay_num = 5;
+    plot_x_y_overlay(xss, yss, n, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename);
+}
 
-    RGBABitmapImageReference *canvasReference = CreateRGBABitmapImageReference();
-    StringReference *errorMessage = CreateStringReference(L"", 0);
+void test_generate_colors()
+{
+    RGBA colors[10];
+    generate_colors(10, colors);
+}
 
-    ScatterPlotSeries *series = GetDefaultScatterPlotSeriesSettings();
-    series->xs = xs;
-    series->xsLength = n;
-    series->ys = ys;
-    series->ysLength = n;
-    series->linearInterpolation = true;
-    series->lineType = L"solid";
-    series->lineTypeLength = wcslen(series->lineType);
-    series->lineThickness = 2;
-    series->color = GetGray(0.3);
-    ScatterPlotSeries *s[] = {series};
+void test_concat_strings()
+{
+    char *concatenated = concat_strings(4, "label1", "label2", "label3", "label4");
 
-    ScatterPlotSettings *settings = GetDefaultScatterPlotSettings();
-    settings->width = 1920;
-    settings->height = 1080;
-    settings->autoBoundaries = true;
-    settings->autoPadding = true;
-    settings->scatterPlotSeries = s;
-    settings->scatterPlotSeriesLength = 1;
+    printf("%s", concatenated);
+}
 
-    success = DrawScatterPlotFromSettings(canvasReference, settings, errorMessage);
+void test_billinear_transform()
+{
+    size_t order = 10;
+    AnalogFilter *p = generate_analog_filter(order, 1.0, 0, 0);
+    // double coefficients_analog[] = {1.0000, 1.4142, 1.0000};
+    for (size_t k = 0; k < p->size_a; k++)
+        printf("an %f \n", p->a_k[k]);
 
-    if (success) {
-        size_t length;
-        ByteArray *pngdata = ConvertToPNG(canvasReference->image);
-        WriteToFile(pngdata, path);
-        DeleteImage(canvasReference->image);
-    } else {
-        fprintf(stderr, "Error: ");
-        for (int i = 0; i < errorMessage->stringLength; i++) {
-            fprintf(stderr, "%c", errorMessage->string[i]);
-        }
-        fprintf(stderr, "\n");
+    // double *transformed = transform_polynomial(order, -1.0, 1.0, 1.0, 1.0, p->a_k);
+    double *r = (double *)calloc((order + 1), sizeof(double));
+    memcpy(r, p->a_k, (order + 1) * sizeof(double));
+    bilinear_transform(1.0, -1.0, 1.0, 1.0, p->a_k, order);
+
+    for (size_t k = 0; k < order + 1; k++)
+        printf("transform %20.17le \n", p->a_k[k]);
+
+    free(r);
+    free_analog_filter(p);
+}
+
+// // https://arxiv.org/pdf/2401.03071
+// void horner_step1_divide_sn_substitute(DigitalFilter *p)
+// {
+//     // divide by the highest order and substitute
+//     // digital filter has its
+// }
+
+// // https://arxiv.org/pdf/2401.03071
+// void horner_step2_decrease_by_1_with_synthetic_division(DigitalFilter *p)
+// {
+//     // Next we can decrease the zeros by 1 using synthetic division
+// }
+
+// // https://arxiv.org/pdf/2401.03071
+// void horner_step4_scale_polynomial_zeros_by_2(DigitalFilter *p)
+// {
+//     /*
+//     Scale the polynomial zeroes by 2. Note can you could scale by
+//         either 1
+//     2 or 2 for the orders of power since the polynomials are in both the numerator and
+//     denominator.
+//     */
+// }
+
+// // https://arxiv.org/pdf/2401.03071
+// void horner_step5_increase_by_1_with_synthetic_division(DigitalFilter *p)
+// {
+//     //  Increase all polynomial zeros by 1 using synthetic division
+// }
+
+// // https://arxiv.org/pdf/2401.03071
+// void billinear_transform_horner_method()
+// {
+// }
+
+// Function to perform the bilinear transform
+// implementation from the article is failed
+// https://digitalcommons.unl.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1085&context=imsefacpub
+void bilinear_transform(double alpha, double beta, double delta, double gamma, double *r, int Order)
+{
+    int k, j;
+    double sum;
+    double *beta_powers, *gamma_powers;
+
+    // Allocate memory for beta_powers and gamma_powers arrays
+    beta_powers = (double *)malloc((Order + 1) * sizeof(double));
+    gamma_powers = (double *)malloc((Order + 1) * sizeof(double));
+
+    if (beta_powers == NULL || gamma_powers == NULL) {
+        printf("Memory allocation failed!\n");
+        return;
     }
 
-    FreeAllocations();
+    // Initialize the first elements of beta_powers and gamma_powers
+    beta_powers[0] = gamma_powers[0] = 1;
 
-    return success ? 0 : 1;
+    // Compute beta_powers and gamma_powers
+    for (j = 1; j < Order; j++) {
+        beta_powers[j] = beta * beta_powers[j - 1];
+        gamma_powers[j] = gamma * gamma_powers[j - 1];
+    }
+
+    // Compute the coefficients using the bilinear transform
+    for (k = 0; k < Order; k++) {
+        sum = 0.0;
+        for (j = 0; j < Order - k; j++) {
+            sum += beta_powers[j] * gamma_powers[Order - k - j] * r[j];
+        }
+        for (j = 0; j < Order - k; j++) {
+            r[j] = ((Order - k - j) * delta * r[j] + (j + 1) * alpha * r[j + 1]) / (k + 1);
+        }
+        r[Order - k] = sum;
+    }
+
+    // Free allocated memory
+    free(beta_powers);
+    free(gamma_powers);
 }
