@@ -18,6 +18,8 @@ typedef struct
     double *b_k; ///< Coefficients of the numerator polynomial.
     int size_a;  ///< Number of coefficients in the denominator polynomial.
     int size_b;  ///< Number of coefficients in the numerator polynomial.
+    int power_numerator;
+    int power_denominator;
 } DigitalFilter;
 
 /**

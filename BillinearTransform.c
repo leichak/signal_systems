@@ -66,3 +66,76 @@ DigitalFilter *transform_analog_to_digital(AnalogFilter *p_a)
 
     return p_d;
 }
+
+// // https://arxiv.org/pdf/2401.03071
+void horner_step1_divide_sn_substitute(DigitalFilter *p)
+{
+    // divide by the highest order and substitute s for 2fl/x
+    // input is  b x^i ... i=start+0..start+1...start+2...len()
+    // size will stay the same so start power is sufficient?
+    int power_b = (p->power_numerator + (p->size_b - 1));
+    int power_a = (p->power_denominator + (p->size_a - 1));
+
+    // Divide by a power
+    int max_power = power_b > power_a ? power_b : power_a;
+    p->power_numerator -= max_power;
+    p->power_denominator -= max_power;
+}
+
+// https://arxiv.org/pdf/2401.03071
+void horner_decrease_by_n_with_synthetic_division(DigitalFilter *p, int n)
+{
+
+    // Next we can decrease the zeros by 1 using synthetic division
+}
+
+void horner_step3_replace_all_zeros_with_reciprocals(DigitalFilter *p)
+{
+    // just flipping coefficients
+    double *p1 = p->b_k;
+    double *p2 = p->b_k + p->size_b;
+
+    while (p1 != p2) {
+        double t = *p1;
+        *p1 = *p2;
+        *p2 = t;
+
+        p1++;
+        p2--;
+    }
+
+    // just flipping coefficients
+    p1 = p->a_k;
+    p2 = p->a_k + p->size_a;
+
+    while (p1 != p2) {
+        double t = *p1;
+        *p1 = *p2;
+        *p2 = t;
+
+        p1++;
+        p2--;
+    }
+}
+
+// // https://arxiv.org/pdf/2401.03071
+// void horner_step4_scale_polynomial_zeros_by_2(DigitalFilter *p)
+// {
+//     /*
+//     Scale the polynomial zeroes by 2. Note can you could scale by
+//         either 1
+//     2 or 2 for the orders of power since the polynomials are in both the numerator and
+//     denominator.
+//     */
+// }
+
+// // https://arxiv.org/pdf/2401.03071
+// void horner_step5_increase_by_1_with_synthetic_division(DigitalFilter *p)
+// {
+//     //  Increase all polynomial zeros by 1 using synthetic division
+// }
+
+// // https://arxiv.org/pdf/2401.03071
+// void billinear_transform_horner_method()
+// {
+// }

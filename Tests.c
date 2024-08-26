@@ -6,7 +6,7 @@
 #include "BillinearTransform.h"
 #include "DigitalFilters.h"
 #include "Filtering.h"
-#include "Tests.h"
+#include "Tests.h"§
 
 const char *TEST_IMAGE_OUTPUT_PREFIX = "./tests/images/";
 
@@ -232,40 +232,7 @@ void test_billinear_transform()
     free_analog_filter(p);
 }
 
-// // https://arxiv.org/pdf/2401.03071
-// void horner_step1_divide_sn_substitute(DigitalFilter *p)
-// {
-//     // divide by the highest order and substitute
-//     // digital filter has its
-// }
 
-// // https://arxiv.org/pdf/2401.03071
-// void horner_step2_decrease_by_1_with_synthetic_division(DigitalFilter *p)
-// {
-//     // Next we can decrease the zeros by 1 using synthetic division
-// }
-
-// // https://arxiv.org/pdf/2401.03071
-// void horner_step4_scale_polynomial_zeros_by_2(DigitalFilter *p)
-// {
-//     /*
-//     Scale the polynomial zeroes by 2. Note can you could scale by
-//         either 1
-//     2 or 2 for the orders of power since the polynomials are in both the numerator and
-//     denominator.
-//     */
-// }
-
-// // https://arxiv.org/pdf/2401.03071
-// void horner_step5_increase_by_1_with_synthetic_division(DigitalFilter *p)
-// {
-//     //  Increase all polynomial zeros by 1 using synthetic division
-// }
-
-// // https://arxiv.org/pdf/2401.03071
-// void billinear_transform_horner_method()
-// {
-// }
 
 // Function to perform the bilinear transform
 // implementation from the article is failed
