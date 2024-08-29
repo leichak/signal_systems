@@ -30,7 +30,7 @@ void test_make_causal();
  */
 void test_generate_filters();
 
-void test_billinear_transform();
+void test_bilinear_transform();
 
 /**
  * @brief Test function for generating various analog filters.
@@ -51,5 +51,7 @@ void test_overlay_multiple_lines();
 void test_generate_colors();
 
 void test_concat_strings();
-void bilinear_transform(double alpha, double beta, double delta, double gamma, double *r, int Order);
+
+void test_synthetic_division();
+
 #endif

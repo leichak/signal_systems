@@ -56,6 +56,8 @@ typedef struct
     int size_b;            ///< Number of coefficients in the numerator.
     int order_numerator;   ///< Order of the numerator polynomial.
     int order_denominator; ///< Order of the denominator polynomial.
+    BandType band_type;
+    FilterTypes filter_type;
 } AnalogFilter;
 
 /**
