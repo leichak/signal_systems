@@ -20,7 +20,7 @@ void free_digital_filter(DigitalFilter *p)
     }
 }
 
-double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, int n)
+double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, int n, double fs)
 {
     double *w_k = (double *)calloc(n, sizeof(double));
     if (w_k == NULL) {
@@ -34,9 +34,9 @@ double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, 
         denominator = 0 + 0 * I;
         for (size_t k = 0; k < size; k++) {
             if (k < p->size_b)
-                numerator += p->b_k[k] * cexp(-(w_k[i]) * I * (double)(k));
+                numerator += p->b_k[k] * cexp(-(w_k[i]) * I * (double)(p->power_numerator - k));
             if (k < p->size_a)
-                denominator += p->a_k[k] * cexp(-(w_k[i]) * I * (double)(k));
+                denominator += p->a_k[k] * cexp(-(10 * w_k[i]) * I * (double)(p->power_denominator - k));
         }
         hw = numerator / denominator;
         magnitudes[i] = cabs(hw);

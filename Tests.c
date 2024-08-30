@@ -43,9 +43,9 @@ void test_magnitude_phase_response_analog_digital()
     size_t n = 400;
     double *magnitudes_analog = (double *)calloc(n, sizeof(double));
     double *magnitudes_digital = (double *)calloc(n, sizeof(double));
-    size_t order = 2;
+    size_t order = 4;
     size_t band = 0;
-    double cutoff = 0.2;
+    double cutoff = 0.01;
 
     printf("Order %zu Type %d Band %zu\n", order, BUTTERWORTH, band);
 
@@ -55,7 +55,7 @@ void test_magnitude_phase_response_analog_digital()
         return;
     }
 
-    DigitalFilter *p_d = bilinear_transform_horner_method(p, 0.2 / (sqrt(2.0) / 2.0)); // why
+    DigitalFilter *p_d = bilinear_transform_horner_method(p, 1); // why
     if (p_d == NULL) {
         free_analog_filter(p);
         return;
@@ -67,7 +67,7 @@ void test_magnitude_phase_response_analog_digital()
                       l2};
 
     double *xs1 = magnitude_response_analog_filter(p, magnitudes_analog, n);
-    double *xs2 = magnitude_response_digital_filter(p_d, magnitudes_digital, n);
+    double *xs2 = magnitude_response_digital_filter(p_d, magnitudes_digital, n, 1);
 
     char mag_filename[] = "analog_vs_digital.png";
 

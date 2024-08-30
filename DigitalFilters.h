@@ -46,7 +46,7 @@ void free_digital_filter(DigitalFilter *p);
  * reference:
  * https://aleksandarhaber.com/magnitude-amplitude-and-phase-response-of-discrete-time-systems-and-filters/
  */
-double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, int n);
+double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, int n, double fs);
 
 /**
  * @brief Function calculating phase response of causal filter
