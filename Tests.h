@@ -3,7 +3,7 @@
 
 // Include pb plots
 #include "AnalogFilters.h"
-#include "BillinearTransform.h"
+#include "BilinearTransform.h"
 #include "DigitalFilters.h"
 #include "Filtering.h"
 

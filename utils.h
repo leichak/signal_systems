@@ -8,8 +8,8 @@
 #include "PbPlots/pbPlots.h"
 #include "PbPlots/supportLib.h"
 
-#define TWICE_PI 2.0 * M_PI;
-#define TWICE_PI_INVERSE 1.0 / 2.0 * M_PI;
+#define TWICE_PI (2.0 * M_PI);
+#define TWICE_PI_INVERSE 1.0 / (2.0 * M_PI);
 
 // Strings utils
 void *concat_path(char *path, char *prefix, char *filename);

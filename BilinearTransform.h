@@ -12,8 +12,10 @@ void horner_shift_polynomial_with_n(DigitalFilter *p, double divisor);
 
 void horner_step4_scale_polynomial_zeros_by_2(DigitalFilter *p);
 
+void horner_step5_make_causal_normalize_to_b0(DigitalFilter *p);
+
 DigitalFilter *bilinear_transform_horner_method(AnalogFilter *p, double fs);
 
-void horner_step5_make_causal_normalize_to_b0(DigitalFilter *p);
+double wa_2_wd(double wa, double T);
 
 #endif // BILINEARTRANSFORM_H

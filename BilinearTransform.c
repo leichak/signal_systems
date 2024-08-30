@@ -1,7 +1,8 @@
-#include "BillinearTransform.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "BilinearTransform.h"
 
 // // https://arxiv.org/pdf/2401.03071
 void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs)
@@ -193,4 +194,9 @@ DigitalFilter *bilinear_transform_horner_method(AnalogFilter *p, double fs)
     horner_step5_make_causal_normalize_to_b0(p_d);
 
     return p_d;
+}
+
+double wa_2_wd(double wa, double T)
+{
+    return (2.0 / T) * atan(wa * (T / 2.0));
 }

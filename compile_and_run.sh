@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define source files
-SOURCE_FILES="main.c AnalogFilters.c DigitalFilters.c BillinearTransform.c Utils.c Filtering.c Tests.c"
+SOURCE_FILES="main.c AnalogFilters.c DigitalFilters.c BilinearTransform.c Utils.c Filtering.c Tests.c"
 
 # Define output folder and executable name
 OUTPUT_DIR="output"

@@ -1,10 +1,12 @@
 #ifndef DIGITALFILTERS_H
 #define DIGITALFILTERS_H
 
-#include "Utils.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "AnalogFilters.h"
+#include "Utils.h"
 
 /**
  * @brief Structure to represent a digital filter.
