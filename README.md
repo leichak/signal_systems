@@ -2,9 +2,10 @@
 
 TODO:
    - write converting functions for analog filters - partially DONE
+   - write units conversions
    - write filtering function for IRRs, write FIR create function
-   - write freq/phase functions for analog and digital
-   - write comparison tests for them
+   - write freq/phase functions for analog and digital - partially DONE
+   - write comparison tests for them - DONE
    - write DIRECT forms
    - write code for discretization
 

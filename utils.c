@@ -187,3 +187,43 @@ wchar_t *char_to_wchar(const char *str)
 
     return wstr;
 }
+
+double rad_s_2_hz(double omega)
+{
+    return omega * TWICE_PI_INVERSE;
+}
+
+double rad_s_2_hz_inv(double f)
+{
+    return f * TWICE_PI;
+}
+
+double rad_s_2_rad_sample(double omega, double fs)
+{
+    return omega / fs;
+}
+
+double rad_s_2_rad_sample_inv(double omega, double fs)
+{
+    return omega * fs;
+}
+
+double hz_2_cycle_sample(double f, double fs)
+{
+    return f / fs;
+}
+
+double hz_2_cycle_sample_inv(double f, double fs)
+{
+    return f * fs;
+}
+
+double hz_2_half_cycle_sample(double f, double fs)
+{
+    return f / (fs / 2);
+}
+
+double hz_2_half_cycle_sample_inv(double f, double fs)
+{
+    return f * (fs / 2);
+}
