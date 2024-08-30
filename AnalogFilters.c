@@ -1,4 +1,5 @@
 #include "AnalogFilters.h"
+#include "Utils.h"
 
 #include <assert.h>
 #include <complex.h>

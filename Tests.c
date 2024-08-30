@@ -1,4 +1,5 @@
 
+#include <complex.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -41,8 +42,8 @@ void test_magnitude_phase_response_analog_digital()
     double *magnitudes_digital = (double *)calloc(n, sizeof(double));
     size_t order = 4;
     size_t band = 0;
-    double cutoff = 0.1;
-    double fs = 2;
+    double cutoff = 0.2;
+    double fs = 20;
 
     printf("Order %zu Type %d Band %zu\n", order, BUTTERWORTH, band);
 
@@ -231,4 +232,36 @@ void test_bilinear_transform()
         printf("\t bk%d %f", p->power_numerator + k, p->b_k[k]);
     }
     printf("\n\tRef: Y [z](1 − 0.4z−1 + 0.2z−2) = X[z](0.2 + 0.4z−1 + 0.2z−2)\n");
+}
+
+void test_ew_function()
+{
+    char filename[] = "ew_test.png";
+    char *labels[] = {(char *)"real", (char *)"imag", (char *)"abs"};
+
+    size_t n = 10;
+    size_t overlay_num = 3;
+
+    double fs = 20;
+    double T = 1 / fs;
+    double *x0 = (double *)calloc(n, sizeof(double));
+    double *y0real = (double *)calloc(n, sizeof(double));
+    double *y0imag = (double *)calloc(n, sizeof(double));
+    double *y0abs = (double *)calloc(n, sizeof(double));
+    double *y0mag = (double *)calloc(n, sizeof(double));
+    fill_n_with_step(x0, n, -M_PI, M_PI);
+    for (size_t k = 0; k < n; k++) {
+        y0real[k] = creal(cexp(2 * M_PI * k / (double)n * I));
+        y0imag[k] = cimag(cexp(2 * M_PI * k / (double)n * I));
+        y0abs[k] = cabs(cexp(M_PI * k / (double)n * I));
+    }
+    double *xss[] = {x0, y0real, x0};
+    double *yss[] = {y0real, y0imag, y0abs};
+
+    plot_x_y_overlay(xss, yss, n, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename);
+
+    free(x0);
+    for (size_t p = 0; p < 3; p++) {
+        free(yss[p]);
+    }
 }

@@ -24,10 +24,11 @@ double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, 
     if (w_k == NULL) {
         return NULL;
     }
+    double T = 1 / fs;
     fill_n_with_step(w_k, n, -M_PI, M_PI);
     for (size_t k = 0; k < n; k++) {
-        // w_k[k] = rad_s_2_hz(wa_2_wd(w_k[k], 1 / fs)); // frequency warping compensation + conversion to Hz
-        w_k[k] = rad_s_2_hz(w_k[k]);
+        //  w_k[k] = rad_s_2_hz(wa_2_wd(w_k[k], T)); // frequency warping compensation + conversion to Hz
+        //  w_k[k] *=  (2 * M_PI)); // rad_s_2_hz(w_k[k]);
     }
     complex double numerator, denominator, hw = 0.0 + 0.0 * I;
     size_t size = max_int(p->size_a, p->size_b);
@@ -36,9 +37,9 @@ double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, 
         denominator = 0 + 0 * I;
         for (size_t k = 0; k < size; k++) {
             if (k < p->size_b)
-                numerator += p->b_k[k] * cexp(-(w_k[i]) * I * (double)(p->size_b - 1 - k));
+                numerator += p->b_k[k] * cexp(-(w_k[i]) * T * I * (double)(k));
             if (k < p->size_a)
-                denominator += p->a_k[k] * cexp(-(w_k[i]) * I * (double)(p->size_a - 1 - k));
+                denominator += p->a_k[k] * cexp(-(w_k[i]) * T * I * (double)(k));
         }
         hw = numerator / denominator;
         magnitudes[i] = cabs(hw);
@@ -56,7 +57,7 @@ double *phase_response_digital_filter(DigitalFilter *p, double *phases, int n)
     fill_n_with_step(w_k, n, -M_PI, M_PI);
     for (size_t k = 0; k < n; k++) {
         // w_k[k] = rad_s_2_hz(wa_2_wd(w_k[k], 1 / fs)); // frequency warping compensation + conversion to Hz
-        w_k[k] = rad_s_2_hz(w_k[k]);
+        // w_k[k] = rad_s_2_hz(w_k[k]);
     }
     complex double numerator, denominator, hw = 0 * 0.0I;
     size_t size = max_int(p->size_a, p->size_b);
@@ -67,7 +68,7 @@ double *phase_response_digital_filter(DigitalFilter *p, double *phases, int n)
             if (k < p->size_b)
                 numerator += p->b_k[k] * cexp(-(w_k[i]) * I * (double)(p->size_b - 1 - k));
             if (k < p->size_a)
-                denominator += p->a_k[k] * cexp(-(w_k[i]) * I * (double)(p->size_a - 1 - k));
+                denominator -= p->a_k[k] * cexp(-(w_k[i]) * I * (double)(p->size_a - 1 - k));
         }
         hw = numerator / denominator;
         double hw_re = creal(hw);

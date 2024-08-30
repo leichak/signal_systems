@@ -54,4 +54,6 @@ void test_concat_strings();
 
 void test_synthetic_division();
 
+void test_ew_function();
+
 #endif
