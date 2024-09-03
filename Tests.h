@@ -6,6 +6,8 @@
 #include "BilinearTransform.h"
 #include "DigitalFilters.h"
 #include "Filtering.h"
+#include "FixedPoint.h"
+#include "Utils.h"
 
 /**
  * @brief Test function for validating the analog-to-digital filter transformation.
@@ -57,4 +59,7 @@ void test_synthetic_division();
 void test_ew_function();
 
 void test_fixed_multiplication();
+
+void test_quantization_error_different_k();
+
 #endif

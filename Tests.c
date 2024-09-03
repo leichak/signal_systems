@@ -286,5 +286,44 @@ void test_fixed_multiplication()
     }
 
     // Output data type is fix<16,14>
-    printf("Result %f \n", (result_16_14 * 1.0f / (1 << 14)));
+    printf("Multiplication  result %f \n", (result_16_14 * 1.0f / (1 << 14)));
+}
+
+void test_quantization_error_different_k()
+{
+    size_t size = 1000;
+    double random_numbers[size];
+    for (size_t k = 0; k < size; k++)
+        random_numbers[k] = (double)random_float(-1.0, 1.0);
+
+    // Different k
+    size_t ks_num = 15;
+    double ks[ks_num];
+    double errors[ks_num];
+    for (size_t k = 1; k <= ks_num; k++)
+        ks[k - 1] = k;
+
+    // Fill results vectors with random numbers
+    double **results = malloc(sizeof(double *) * ks_num);
+    for (size_t k = 1; k <= ks_num; k++) {
+        results[k - 1] = (double *)malloc(size * sizeof(double));
+        memcpy(results[k - 1], &random_numbers, size * sizeof(double));
+        for (size_t j = 0; j < size; j++) // convert and convert back
+            results[k - 1][j] = to_float(to_fix(results[k - 1][j], k), k);
+        errors[k - 1] = 20.0 * log10(l1_norm_mean(results[k - 1], &random_numbers, size) / 1.0);
+    }
+
+    char filename[] = "k_fractional_vs_error.png";
+    char *labels[] = {(char *)"error"};
+
+    size_t n = ks_num;
+    size_t overlay_num = 1;
+
+    double *xss[] = {&ks};
+    double *yss[] = {&errors};
+
+    plot_x_y_overlay(xss, yss, n, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename);
+
+    for (size_t k = 0; k < ks_num; k++)
+        free(results[k]);
 }

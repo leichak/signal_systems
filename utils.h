@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "PbPlots/pbPlots.h"
 #include "PbPlots/supportLib.h"
@@ -85,4 +86,15 @@ double hz_2_half_cycle_sample(double f, double fs);
 /// @return Hz
 double hz_2_half_cycle_sample_inv(double f, double fs);
 
+// Distance errors
+
+double l1_norm_mean(double *v1, double *v2, int size);
+
+double l2_norm_mean(double *v1, double *v2, int size);
+
+double mean_square(double *v1, double *v2, int size);
+
+// Random
+
+float random_float(float min, float max);
 #endif

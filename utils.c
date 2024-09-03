@@ -105,7 +105,7 @@ int plot_x_y_overlay(double *xs[], double *ys[], size_t n_points, size_t overlay
     settings->scatterPlotSeries = s;
     settings->scatterPlotSeriesLength = overlayed_num;
     settings->autoBoundaries = true;
-    settings->autoPadding = false;
+    settings->autoPadding = true;
 
     RGBABitmapImageReference *canvasReference = CreateRGBABitmapImageReference();
     errorMessage = (StringReference *)malloc(sizeof(StringReference));
@@ -226,4 +226,48 @@ double hz_2_half_cycle_sample(double f, double fs)
 double hz_2_half_cycle_sample_inv(double f, double fs)
 {
     return f * (fs / 2);
+}
+
+double l2_norm_mean(double *v1, double *v2, int size)
+{
+    double sum = 0.0;
+
+    for (int i = 0; i < size; i++) {
+        double diff = v1[i] - v2[i];
+        sum += diff * diff;
+    }
+
+    return sqrt(sum) / size;
+}
+
+double l1_norm_mean(double *v1, double *v2, int size)
+{
+    double sum = 0.0;
+
+    for (int i = 0; i < size; i++) {
+        sum += fabs(v1[i] - v2[i]);
+    }
+
+    return sum / size;
+}
+
+double mean_square(double *v1, double *v2, int size)
+{
+    double sum = 0.0;
+
+    for (int i = 0; i < size; i++) {
+        double diff = v1[i] - v2[i];
+        sum += diff * diff;
+    }
+
+    return sum / size;
+}
+
+float random_float(float min, float max)
+{
+    // Generate a random integer in the range [0, RAND_MAX]
+    float rand_value = (float)rand() / RAND_MAX;
+
+    // Scale and shift to the desired range [min, max]
+    return min + rand_value * (max - min);
 }
