@@ -56,4 +56,5 @@ void test_synthetic_division();
 
 void test_ew_function();
 
+void test_fixed_multiplication();
 #endif

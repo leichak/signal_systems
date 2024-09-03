@@ -265,3 +265,26 @@ void test_ew_function()
         free(yss[p]);
     }
 }
+
+void test_fixed_multiplication()
+{
+    float c[5] = {0.2, -0.4, 0.8, -0.4, 0.2};
+    float taps[5] = {0.1, 0.2, 0.3, 0.4, 0.5};
+    float result;
+
+    int c_8_7[5];
+    int taps_8_7[5];
+    int result_16_14 = 0;
+
+    size_t i;
+
+    // convert c float to c_8_7 (fix<8,7>), taps to fix,
+    for (i = 0; i < 5; i++) {
+        c_8_7[i] = (int)(c[i] * (1 << 7)); // multiply 2^k
+        taps_8_7[i] = (int)(taps[i] * (1 << 7));
+        result_16_14 += c_8_7[i] * taps_8_7[i];
+    }
+
+    // Output data type is fix<16,14>
+    printf("Result %f \n", (result_16_14 * 1.0f / (1 << 14)));
+}
