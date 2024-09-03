@@ -34,16 +34,17 @@ void test_various_orders_filters()
         }
     }
 }
-
+// What are inputs to both plots analog and digital
+//
 void test_magnitude_phase_response_analog_digital()
 {
-    size_t n = 400;
+    size_t n = 1000;
     double *magnitudes_analog = (double *)calloc(n, sizeof(double));
     double *magnitudes_digital = (double *)calloc(n, sizeof(double));
-    size_t order = 4;
+    size_t order = 8;
     size_t band = 0;
-    double cutoff = 0.2;
-    double fs = 20;
+    double cutoff = 0.4 * M_PI; // pi = fs/2, 2pi = fs
+    double fs = 10;
 
     printf("Order %zu Type %d Band %zu\n", order, BUTTERWORTH, band);
 
@@ -62,7 +63,7 @@ void test_magnitude_phase_response_analog_digital()
     char *l1 = concat_strings(4, "butter_analog_", "order_4_", "_lowpass", "color");
     char *l2 = concat_strings(4, "butter_digital_", "order_4_", "_lowpass", "color");
     char *labels[] = {l1,
-                      l2};
+                      l2, "Frequency - w", "Magnitude"};
 
     double *xs1 = magnitude_response_analog_filter(p, magnitudes_analog, n);
     double *xs2 = magnitude_response_digital_filter(p_d, magnitudes_digital, n, fs);
@@ -314,7 +315,7 @@ void test_quantization_error_different_k()
     }
 
     char filename[] = "k_fractional_vs_error.png";
-    char *labels[] = {(char *)"error"};
+    char *labels[] = {(char *)"error", (char *)"number of fractional bits", (char *)"20*log10(l1_norm_error)"};
 
     size_t n = ks_num;
     size_t overlay_num = 1;

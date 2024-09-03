@@ -210,14 +210,12 @@ double *magnitude_response_analog_filter(AnalogFilter *p, double *magnitudes, in
         denominator = 0.0;
         for (size_t k = 0; k < size; k++) {
             if (k < p->size_a)
-                denominator += p->a_k[k] * cpow((w_k[i] / M_PI) * I, (double)(k));
+                denominator += p->a_k[k] * cpow((w_k[i]) * I, (double)(k));
             if (k < p->size_b)
-                numerator += p->b_k[k] * cpow((w_k[i] / M_PI) * I, (double)(k));
+                numerator += p->b_k[k] * cpow((w_k[i]) * I, (double)(k));
         }
         hw = numerator / denominator;
-        double hw_re = creal(hw);
-        double hw_im = cimag(hw);
-        magnitudes[i] = sqrt(pow(hw_re, 2) + pow(hw_im, 2));
+        magnitudes[i] = 20 * log10(cabs(hw));
     }
 
     return w_k;

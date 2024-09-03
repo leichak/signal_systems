@@ -18,4 +18,4 @@ DigitalFilter *bilinear_transform_horner_method(AnalogFilter *p, double fs);
 
 double wa_2_wd(double wa, double T);
 
-#endif // BILINEARTRANSFORM_H
+#endif

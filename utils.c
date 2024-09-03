@@ -106,6 +106,12 @@ int plot_x_y_overlay(double *xs[], double *ys[], size_t n_points, size_t overlay
     settings->scatterPlotSeriesLength = overlayed_num;
     settings->autoBoundaries = true;
     settings->autoPadding = true;
+    wchar_t *xLabel = char_to_wchar(labels[overlayed_num]);
+    settings->xLabel = xLabel;
+    settings->xLabelLength = wcslen(xLabel);
+    wchar_t *yLabel = char_to_wchar(labels[overlayed_num + 1]);
+    settings->yLabel = yLabel;
+    settings->yLabelLength = wcslen(yLabel);
 
     RGBABitmapImageReference *canvasReference = CreateRGBABitmapImageReference();
     errorMessage = (StringReference *)malloc(sizeof(StringReference));

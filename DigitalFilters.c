@@ -18,18 +18,28 @@ void free_digital_filter(DigitalFilter *p)
     }
 }
 
-double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, int n, double fs)
+/* reference: https://www.earlevel.com/main/2016/12/01/evaluating-filter-frequency-response/
+ *
+ *  To translate H(z) to analog response, we substitute ejw for z, where w is 2pi*freq,
+ *  with freq being the normalized frequency/sample rate thus:
+ *
+ *  H(ejw) = (a0e^0jw + a1e^1jw + ... + ane^-kjw) / (abe^0jw + abe^1jw + ... + abe^-kjw) /
+ *  (in our implementation b is numerator and a denominator)
+ *
+ */
+
+double *
+magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, int n, double fs)
 {
     double *w_k = (double *)calloc(n, sizeof(double));
     if (w_k == NULL) {
         return NULL;
     }
     double T = 1 / fs;
-    fill_n_with_step(w_k, n, -M_PI, M_PI);
-    for (size_t k = 0; k < n; k++) {
-        //  w_k[k] = rad_s_2_hz(wa_2_wd(w_k[k], T)); // frequency warping compensation + conversion to Hz
-        //  w_k[k] *=  (2 * M_PI)); // rad_s_2_hz(w_k[k]);
-    }
+    fill_n_with_step(w_k, n, -M_PI / fs, M_PI / fs);
+    // for (size_t k = 0; k < n; k++) {
+    //     w_k[k] = wa_2_wd(w_k[k], T);
+    // }
     complex double numerator, denominator, hw = 0.0 + 0.0 * I;
     size_t size = max_int(p->size_a, p->size_b);
     for (size_t i = 0; i < n; i++) {
@@ -37,12 +47,12 @@ double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, 
         denominator = 0 + 0 * I;
         for (size_t k = 0; k < size; k++) {
             if (k < p->size_b)
-                numerator += p->b_k[k] * cexp(-(w_k[i]) * T * I * (double)(k));
+                numerator += p->b_k[k] * cexp(-w_k[i] * I * (double)(k + p->size_b - 1));
             if (k < p->size_a)
-                denominator += p->a_k[k] * cexp(-(w_k[i]) * T * I * (double)(k));
+                denominator += p->a_k[k] * cexp(-w_k[i] * I * (double)(k + p->size_a - 1));
         }
         hw = numerator / denominator;
-        magnitudes[i] = cabs(hw);
+        magnitudes[i] = 20 * log10(cabs(hw));
     }
 
     return w_k;
