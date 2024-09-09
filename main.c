@@ -15,6 +15,6 @@ int main()
     //  test_synthetic_division();
     // test_bilinear_transform();
     // test_ew_function();
-    test_fixed_multiplication();
-    test_quantization_error_different_k();
+    // test_fixed_multiplication();
+    // test_quantization_error_different_k();
 }

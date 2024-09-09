@@ -37,6 +37,7 @@ magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, int n, d
     }
     double T = 1 / fs;
     fill_n_with_step(w_k, n, -M_PI / fs, M_PI / fs);
+
     // for (size_t k = 0; k < n; k++) {
     //     w_k[k] = wa_2_wd(w_k[k], T);
     // }
@@ -64,7 +65,7 @@ double *phase_response_digital_filter(DigitalFilter *p, double *phases, int n)
     if (w_k == NULL) {
         return NULL;
     }
-    fill_n_with_step(w_k, n, -M_PI, M_PI);
+    fill_n_with_step(w_k, n, 0, 2 * M_PI);
     for (size_t k = 0; k < n; k++) {
         // w_k[k] = rad_s_2_hz(wa_2_wd(w_k[k], 1 / fs)); // frequency warping compensation + conversion to Hz
         // w_k[k] = rad_s_2_hz(w_k[k]);
@@ -87,4 +88,26 @@ double *phase_response_digital_filter(DigitalFilter *p, double *phases, int n)
     }
 
     return w_k;
+}
+
+/** https://www.dsprelated.com/freebooks/filters/Stability_Revisited.html
+ * As defined earlier filter is said to be stable if its impulse response hn decays to 0 as
+ * n goes to infinity. In the terms of poles and zeros, an irreducible filter transfer function
+ * is stable if and only if all its poles are inside the unit circle in the z plan. This is
+ * because transfer function is the z transform of the impulse response, and if there is observable
+ * pole outside the unit circle then there is an exponentially increasing component of the
+ * impulse response. So all poles need to be inside the unit circle.
+ *
+ * Poles on the unit circle may be called marginally stable. The impulse response component
+ * corresponding to a single pole on the unit circle never decays but neither does it grow.
+ *
+ * Apart from checking that all poles are residing inside unit circle there is faster method
+ * based on filter reflection coefficients. It is mathematical fact that all poles of a recursive
+ * filter are inside the unit curcle if and only if all its reflection coefficients are strictly
+ * between -1 and 1.
+ *
+ * Step-down procedure, Schur Cohn stability test or Durbin recursion (Levinson algorithm)
+ */
+bool stability_test(DigitalFilter *p)
+{
 }

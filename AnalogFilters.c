@@ -124,53 +124,6 @@ void transform_to_low_pass(AnalogFilter *p, double wc)
 // Performs a high-pass frequency transformation on the filter
 void transform_to_high_pass(AnalogFilter *p, double wc)
 {
-    int order_numerator = p->order_numerator;
-    int order_denominator = p->order_denominator;
-
-    // Scale the coefficients by wc
-    for (size_t i = 1; i < p->size_a; i++) {
-        p->a_k[i] *= pow(wc, i);
-    }
-    for (size_t i = 1; i < p->size_b; i++) {
-        p->b_k[i] *= pow(wc, i);
-    }
-
-    // Adjust order to account for the high-pass transformation
-    p->order_denominator += order_numerator;
-    p->size_a = p->order_denominator + 1;
-    p->order_numerator += order_denominator;
-    p->size_b = p->order_numerator + 1;
-
-    double *b = (double *)malloc(p->size_b * sizeof(double));
-    double *a = (double *)malloc(p->size_a * sizeof(double));
-    size_t size = max_int(p->size_a, p->size_b);
-
-    // Perform order adjustments (shifting polynomial coefficients)
-    for (size_t i = 0; i < size; i++) {
-        if (i < p->size_b) {
-            b[i] = (i >= order_denominator) ? p->b_k[i - order_denominator] : 0.0;
-        }
-        if (i < p->size_a) {
-            a[i] = (i >= order_numerator) ? p->a_k[i - order_numerator] : 0.0;
-        }
-    }
-
-    // Reverse the orders (required for high-pass transformation)
-    for (int i = 0, j = p->size_b - 1; i < j && i != j; i++, j--) {
-        double t = b[j];
-        b[j] = b[i];
-        b[i] = t;
-    }
-    for (int i = 0, j = p->size_a - 1; i < j && i != j; i++, j--) {
-        double t = a[j];
-        a[j] = a[i];
-        a[i] = t;
-    }
-
-    free(p->a_k);
-    free(p->b_k);
-    p->a_k = a;
-    p->b_k = b;
 }
 
 // Normalizes the filter coefficients to their maximum

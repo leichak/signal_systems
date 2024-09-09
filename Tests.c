@@ -34,17 +34,20 @@ void test_various_orders_filters()
         }
     }
 }
-// What are inputs to both plots analog and digital
-//
+// What are inputs to both plots analog and digital - normalized freq
+// Plot stability of filters after billinera transform
+// It works for particularly low frequencies
+// So stability might check whether poles are inside unit circle
+// because for higher orders higher fs cause weird distortions
 void test_magnitude_phase_response_analog_digital()
 {
-    size_t n = 1000;
+    size_t n = 2000;
     double *magnitudes_analog = (double *)calloc(n, sizeof(double));
     double *magnitudes_digital = (double *)calloc(n, sizeof(double));
-    size_t order = 8;
-    size_t band = 0;
-    double cutoff = 0.4 * M_PI; // pi = fs/2, 2pi = fs
-    double fs = 10;
+    size_t order = 2;
+    size_t band = LOWPASS;
+    double cutoff = 0.5 * M_PI; // pi = fs/2, 2pi = fs
+    double fs = 44000.0;
 
     printf("Order %zu Type %d Band %zu\n", order, BUTTERWORTH, band);
 
@@ -54,11 +57,14 @@ void test_magnitude_phase_response_analog_digital()
         return;
     }
 
-    DigitalFilter *p_d = bilinear_transform_horner_method(p, fs); // why
+    DigitalFilter *p_d = bilinear_transform_horner_method(p, fs, cutoff); // why
     if (p_d == NULL) {
         free_analog_filter(p);
         return;
     }
+
+    for (size_t k = 0; k < p_d->size_a; k++)
+        printf("a%zu: %f\n", k, p_d->a_k[k]);
 
     char *l1 = concat_strings(4, "butter_analog_", "order_4_", "_lowpass", "color");
     char *l2 = concat_strings(4, "butter_digital_", "order_4_", "_lowpass", "color");
@@ -133,7 +139,7 @@ void test_synthetic_division()
         .power_numerator = 0,
         .power_denominator = 2,
     };
-    horner_shift_polynomial_with_n(&p, 1);
+    horner_step2_5_shift_polynomial_with_n(&p, 1.0);
 
     for (size_t k = 0; k < p.size_a; k++) {
         printf("\t a%zu %f", k, p.a_k[k]);
@@ -169,68 +175,68 @@ void test_bilinear_transform()
     double fs = 1.0;
 
     for (size_t k = 0; k < p->size_a; k++) {
-        printf("\t a%zu %f", k, p->a_k[k]);
+        printf("\t a%zu %Lf", k, p->a_k[k]);
     }
     for (size_t k = 0; k < p->size_b; k++) {
-        printf("\t b%zu %f", k, p->b_k[k]);
+        printf("\t b%zu %Lf", k, p->b_k[k]);
     }
     printf("\nsubstitute / divide\n");
-    horner_step1_divide_sn_substitute(p, fs);
+    horner_step1_divide_sn_substitute(p, fs, 0.0, false);
     for (size_t k = 0; k < p->size_a; k++) {
-        printf("\t a%zu %f", k, p->a_k[k]);
+        printf("\t a%zu %Lf", k, p->a_k[k]);
     }
     for (size_t k = 0; k < p->size_b; k++) {
-        printf("\t b%zu %f", k, p->b_k[k]);
+        printf("\t b%zu %Lf", k, p->b_k[k]);
     }
     printf("\n");
     printf("\tRef: N (s) → N (x) = 0.5x2 D(s) → D(x) = 0.5x2 + x + 1 \n");
     printf("\nshift + 1\n");
-    horner_shift_polynomial_with_n(p, 1);
+    horner_step2_5_shift_polynomial_with_n(p, 1);
     for (size_t k = 0; k < p->size_a; k++) {
-        printf("\t a%zu %f", k, p->a_k[k]);
+        printf("\t a%zu %Lf", k, p->a_k[k]);
     }
     for (size_t k = 0; k < p->size_b; k++) {
-        printf("\t b%zu %f", k, p->b_k[k]);
+        printf("\t b%zu %Lf", k, p->b_k[k]);
     }
     printf("\n");
     printf("\tRef: N (x + 1) = 0.5x2 + x + 0.5 D(x + 1) = 0.5x2 + 2x + 2.5 \n");
     printf("\nflip\n");
     horner_step3_flip(p);
     for (size_t k = 0; k < p->size_a; k++) {
-        printf("\t a%zu %f", k, p->a_k[k]);
+        printf("\t a%zu %Lf", k, p->a_k[k]);
     }
     for (size_t k = 0; k < p->size_b; k++) {
-        printf("\t b%zu %f", k, p->b_k[k]);
+        printf("\t b%zu %Lf", k, p->b_k[k]);
     }
     printf("\n");
     printf("\tRef: N ( 1/x + 1) = 0.5x2 + x + 0.5 D( 1/x + 1) = 2.5x2 + 2x + 0.5 \n");
     printf("\nscale by 2\n ");
     horner_step4_scale_polynomial_zeros_by_2(p);
     for (size_t k = 0; k < p->size_a; k++) {
-        printf("\t a%zu %f", k, p->a_k[k]);
+        printf("\t a%zu %Lf", k, p->a_k[k]);
     }
     for (size_t k = 0; k < p->size_b; k++) {
-        printf("\t b%zu %f", k, p->b_k[k]);
+        printf("\t b%zu %Lf", k, p->b_k[k]);
     }
     printf("\n");
     printf("\tRef: N ( 2/x + 1) = 0.125x2 + 0.5x + 0.5 D( 2/x + 1) = 0.625x2 + x + 0.5 \n");
     printf("\nshift -1\n");
-    horner_shift_polynomial_with_n(p, -1);
+    horner_step2_5_shift_polynomial_with_n(p, -1);
     for (size_t k = 0; k < p->size_a; k++) {
-        printf("\t a%zu %f", k, p->a_k[k]);
+        printf("\t a%zu %Lf", k, p->a_k[k]);
     }
     for (size_t k = 0; k < p->size_b; k++) {
-        printf("\t b%zu %f", k, p->b_k[k]);
+        printf("\t b%zu %Lf", k, p->b_k[k]);
     }
     printf("\n");
     printf("\tRef: N (x) = 0.125x2 + 0.25x + 0.125 D(x) = 0.625x2 − 0.25x + 0.125 \n");
     printf("\nmake causal and normalise\n");
-    horner_step5_make_causal_normalize_to_b0(p);
+    horner_step6_make_causal_normalize_to_a0(p);
     for (size_t k = 0; k < p->size_a; k++) {
-        printf("\t ak%d %f", p->power_denominator + k, p->a_k[k]);
+        printf("\t ak%d %Lf", p->power_denominator + k, p->a_k[k]);
     }
     for (size_t k = 0; k < p->size_b; k++) {
-        printf("\t bk%d %f", p->power_numerator + k, p->b_k[k]);
+        printf("\t bk%d %Lf", p->power_numerator + k, p->b_k[k]);
     }
     printf("\n\tRef: Y [z](1 − 0.4z−1 + 0.2z−2) = X[z](0.2 + 0.4z−1 + 0.2z−2)\n");
 }
@@ -320,8 +326,8 @@ void test_quantization_error_different_k()
     size_t n = ks_num;
     size_t overlay_num = 1;
 
-    double *xss[] = {&ks};
-    double *yss[] = {&errors};
+    double **xss[] = {&ks};
+    double **yss[] = {&errors};
 
     plot_x_y_overlay(xss, yss, n, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename);
 

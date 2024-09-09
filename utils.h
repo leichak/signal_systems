@@ -97,4 +97,7 @@ double mean_square(double *v1, double *v2, int size);
 // Random
 
 float random_float(float min, float max);
+
+// Maths
+
 #endif
