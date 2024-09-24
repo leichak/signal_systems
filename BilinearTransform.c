@@ -27,11 +27,9 @@ void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewa
     p->power_numerator = abs(p->power_numerator);
     p->power_denominator = abs(p->power_denominator);
 
-    // we can assume that if there is difference with final power and size we need to allocate if (p->power_denominator != p->size_a - 1)
+    // we can assume that if there is difference with final power and size we need to allocate
     if (p->power_denominator != p->size_a - 1) {
-        size_t new_power = p->power_denominator + (p->power_denominator - (p->size_a - 1));
-        double *a_k = (long double *)calloc(new_power, sizeof(long double));
-        p->power_denominator = new_power;
+        double *a_k = (double *)calloc(p->power_denominator + 1, sizeof(double));
         for (size_t k = 0; k < p->size_a; k++) {
             a_k[k] = p->a_k[k];
         }
@@ -41,9 +39,7 @@ void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewa
     }
 
     if (p->power_numerator != p->size_b - 1) {
-        size_t new_power = p->power_numerator + (p->power_numerator - (p->size_b - 1));
-        double *b_k = (long double *)calloc(new_power, sizeof(long double));
-        p->power_numerator = new_power;
+        double *b_k = (double *)calloc(p->power_numerator + 1, sizeof(double));
         for (size_t k = 0; k < p->size_b; k++) {
             b_k[k] = p->b_k[k];
         }
