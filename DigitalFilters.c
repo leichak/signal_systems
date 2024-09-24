@@ -38,9 +38,6 @@ magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, int n, d
     double T = 1 / fs;
     fill_n_with_step(w_k, n, -M_PI / fs, M_PI / fs);
 
-    // for (size_t k = 0; k < n; k++) {
-    //     w_k[k] = wa_2_wd(w_k[k], T);
-    // }
     complex double numerator, denominator, hw = 0.0 + 0.0 * I;
     size_t size = max_int(p->size_a, p->size_b);
     for (size_t i = 0; i < n; i++) {
@@ -108,6 +105,3 @@ double *phase_response_digital_filter(DigitalFilter *p, double *phases, int n)
  *
  * Step-down procedure, Schur Cohn stability test or Durbin recursion (Levinson algorithm)
  */
-bool stability_test(DigitalFilter *p)
-{
-}

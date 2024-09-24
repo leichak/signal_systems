@@ -23,8 +23,8 @@ typedef struct
     long double *b_k;      ///< Coefficients of the numerator polynomial.
     int size_a;            ///< Number of coefficients in the denominator polynomial.
     int size_b;            ///< Number of coefficients in the numerator polynomial.
-    int power_numerator;   ///< Power corresponding to the first vector coefficient
-    int power_denominator; ///< Power corresponding to the first vector coefficient
+    int power_numerator;   ///< Max power in polynomial
+    int power_denominator; ///< Max power in polynomial
 } DigitalFilter;
 
 /**
@@ -58,7 +58,5 @@ double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, 
  * https://aleksandarhaber.com/magnitude-amplitude-and-phase-response-of-discrete-time-systems-and-filters/
  */
 double *phase_response_digital_filter(DigitalFilter *p, double *phases, int n);
-
-bool stability_test(DigitalFilter *p);
 
 #endif // DIGITALFILTERS_H

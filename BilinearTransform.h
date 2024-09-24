@@ -3,7 +3,8 @@
 
 #include "AnalogFilters.h"
 #include "DigitalFilters.h"
-void horner_step6_make_causal_normalize_to_a0(DigitalFilter *p);
+
+void horner_step6_make_causal_normalize_to_a0(DigitalFilter *p, double fs);
 
 void horner_step2_5_shift_polynomial_with_n(DigitalFilter *p, long double divisor);
 
@@ -36,5 +37,7 @@ the more challenging it becomes to maintain precision due to rounding and quanti
 DigitalFilter *bilinear_transform_horner_method(AnalogFilter *p, double fs, double w0);
 
 double wa_2_wd(double wa, double T);
+
+int stabilitycheck(double *A, int length);
 
 #endif

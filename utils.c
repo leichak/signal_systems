@@ -76,7 +76,7 @@ ScatterPlotSeries *get_series_solid_thickness_color(double *xs, double *ys, size
     return series;
 }
 
-int plot_x_y_overlay(double *xs[], double *ys[], size_t n_points, size_t overlayed_num, size_t thickness, char *labels[], const char *prefix, char *filename)
+int plot_x_y_overlay(double *xs[], double *ys[], size_t n_points, size_t overlayed_num, size_t thickness, char *labels[], const char *prefix, char *filename, int range_y[])
 {
 
     char *path;
@@ -146,6 +146,14 @@ int plot_x_y_overlay(double *xs[], double *ys[], size_t n_points, size_t overlay
     free(path);
 
     return success ? 0 : 1;
+}
+
+void clip_double(double *xs, size_t len, double max, double min)
+{
+    for (size_t k = 0; k < len; k++) {
+        xs[k] = fmin(xs[k], max);
+        xs[k] = fmax(xs[k], min);
+    }
 }
 
 char *concat_strings(int count, ...)
@@ -276,4 +284,20 @@ float random_float(float min, float max)
 
     // Scale and shift to the desired range [min, max]
     return min + rand_value * (max - min);
+}
+
+double *generate_n_sines(double freqs[], size_t num, double fs, double len_s)
+{
+    // Create array on the heap
+    size_t len = (size_t)(len_s * fs);
+    double *x = (double *)calloc(len, sizeof(double));
+
+    for (size_t j = 0; j < len; j++) {
+        for (size_t k = 0; k < num; k++) {
+            x[j] = (1.0 / ((double)num)) * sin(2.0 * M_PI * freqs[k] * ((double)j) / (double)len);
+            printf("%f \n", x[j]);
+        }
+    }
+
+    return x;
 }

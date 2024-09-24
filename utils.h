@@ -26,13 +26,15 @@ ScatterPlotSeries *get_series_solid_thickness_color(double *xs, double *ys, size
 
 int plot_x_y_single(double *xs, double *ys, size_t n, const char *prefix, char *filename);
 
-int plot_x_y_overlay(double *xs[], double *ys[], size_t n_points, size_t overlayed_num, size_t thickness, char *labels[], const char *prefix, char *filename);
+int plot_x_y_overlay(double *xs[], double *ys[], size_t n_points, size_t overlayed_num, size_t thickness, char *labels[], const char *prefix, char *filename, int range[]);
 
 void generate_colors(int m, RGBA *colors);
 
 // Pre computed utils
 
 void fill_n_with_step(double *xs, size_t size, float start, float stop);
+
+void clip_double(double *xs, size_t len, double max, double min);
 
 // Numerical utils
 
@@ -98,6 +100,8 @@ double mean_square(double *v1, double *v2, int size);
 
 float random_float(float min, float max);
 
-// Maths
+// Signal Generation
+
+double *generate_n_sines(double freqs[], size_t num, double fs, double len_s);
 
 #endif

@@ -9,11 +9,11 @@ void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewa
 {
     // coefficients here should be in increasing order, 0,1,2,3,4 power
     // dividing by the 1/(s^ max_power) makes 4rth power 1 and, 0 power -4
-    // substituting 2fl / x then will essentialy flip coefficicents and leave
+    // substituting 2fl / x then will essentially flip coefficients and leave
     // multiplied by (1/2fl)^power, so powers are 4,3,2,1,0,
     // we should multiply and flip again to make it ok
 
-    // not sure whether i need it
+    // start max power
     int power_b_max = p->size_b - 1; // start power
     int power_a_max = p->size_a - 1; // start power,
 
@@ -27,9 +27,11 @@ void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewa
     p->power_numerator = abs(p->power_numerator);
     p->power_denominator = abs(p->power_denominator);
 
-    // we can assume that if there is difference with final power and size we need to allocate
+    // we can assume that if there is difference with final power and size we need to allocate if (p->power_denominator != p->size_a - 1)
     if (p->power_denominator != p->size_a - 1) {
-        double *a_k = (long double *)calloc(p->power_denominator + 1, sizeof(long double));
+        size_t new_power = p->power_denominator + (p->power_denominator - (p->size_a - 1));
+        double *a_k = (long double *)calloc(new_power, sizeof(long double));
+        p->power_denominator = new_power;
         for (size_t k = 0; k < p->size_a; k++) {
             a_k[k] = p->a_k[k];
         }
@@ -39,7 +41,9 @@ void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewa
     }
 
     if (p->power_numerator != p->size_b - 1) {
-        double *b_k = (long double *)calloc(p->power_numerator + 1, sizeof(long double));
+        size_t new_power = p->power_numerator + (p->power_numerator - (p->size_b - 1));
+        double *b_k = (long double *)calloc(new_power, sizeof(long double));
+        p->power_numerator = new_power;
         for (size_t k = 0; k < p->size_b; k++) {
             b_k[k] = p->b_k[k];
         }
@@ -63,9 +67,6 @@ void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewa
     for (size_t k = 0; k < p->size_a; k++) {
         p->a_k[k] /= powf(K, ((long double)p->size_a - 1 - (long double)k));
     }
-
-    p->power_numerator = p->power_numerator - 2 * (p->size_b - 1);
-    p->power_denominator = p->power_denominator - 2 * (p->size_a - 1);
 
     horner_step3_flip(p);
 }
@@ -105,6 +106,7 @@ void horner_step2_5_shift_polynomial_with_n(DigitalFilter *p, long double diviso
         }
         up_to -= 1;
     }
+
     // write in original order // flip again // powers 0,1,2,3,4,5
     for (size_t k = 0; k < p->size_b; k++) {
         p->b_k[size_b - 1 - k] = division_b[k];
@@ -158,16 +160,29 @@ void horner_step4_scale_polynomial_zeros_by_2(DigitalFilter *p)
     }
 }
 
-void horner_step6_make_causal_normalize_to_a0(DigitalFilter *p)
+void horner_step6_make_causal_normalize_to_a0(DigitalFilter *p, double fs)
 {
     // not sure whether i need it
-    int power_b_max = p->size_b - 1; // start power
-    int power_a_max = p->size_a - 1; // start power,
+    int power_b_max = p->size_b - 1;
+    int power_a_max = p->size_a - 1;
 
     // multiplying by 1/s^n max
     int power_max = power_b_max > power_a_max ? power_b_max : power_a_max;
-    p->power_numerator -= power_max;
-    p->power_denominator -= power_max;
+    // p->power_numerator -= power_max;
+    // p->power_denominator -= power_max;
+
+    p->power_numerator = p->power_numerator - 2 * (power_max);
+    p->power_denominator = p->power_denominator - 2 * (power_max);
+
+    // for (size_t k = 0; k < p->size_a; k++) {
+    //     p->a_k[k] *= 1.0 / powf(fs, -k);
+    // }
+
+    // for (size_t k = 0; k < p->size_b; k++) {
+    //     p->b_k[k] *= 1.0 / powf(fs, -k);
+    // }
+
+    // reflect sample rate
 
     // make y0 to be 1
     double norm = p->a_k[p->size_a - 1];
@@ -193,12 +208,13 @@ DigitalFilter *bilinear_transform_horner_method(AnalogFilter *p, double fs, doub
     p_d->power_numerator = 0;
     p_d->power_denominator = 0;
 
+    // Input coefficients from analog are in order 0,1...n power
     horner_step1_divide_sn_substitute(p_d, fs, w0, true);
     horner_step2_5_shift_polynomial_with_n(p_d, 1.0);
     horner_step3_flip(p_d);
     horner_step4_scale_polynomial_zeros_by_2(p_d);
     horner_step2_5_shift_polynomial_with_n(p_d, -1);
-    horner_step6_make_causal_normalize_to_a0(p_d);
+    horner_step6_make_causal_normalize_to_a0(p_d, 1.0);
 
     return p_d;
 }
@@ -206,4 +222,27 @@ DigitalFilter *bilinear_transform_horner_method(AnalogFilter *p, double fs, doub
 double wa_2_wd(double wa, double T)
 {
     return (2.0 / T) * atan(wa * (T / 2.0));
+}
+
+int stabilitycheck(double *A, int length)
+{
+    int N = length - 1; // Order of A(z)
+    int stable = 1;     // Assume stable unless shown otherwise
+
+    // Ensure A is a column vector (already handled as a pointer in C)
+    for (int i = N - 1; i >= 0; i--) {
+        double rci = A[i + 1]; // Get reflection coefficient
+
+        if (fabs(rci) >= 1) {
+            stable = 0;
+            return stable; // System is unstable
+        }
+
+        // Update A array with new coefficients
+        for (int j = 0; j < i; j++) {
+            A[j] = (A[j] - rci * A[i + 1 - j]) / (1 - rci * rci);
+        }
+    }
+
+    return stable; // Return 1 if stable, 0 if unstable
 }

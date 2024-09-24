@@ -35,7 +35,7 @@ void test_various_orders_filters()
     }
 }
 // What are inputs to both plots analog and digital - normalized freq
-// Plot stability of filters after billinera transform
+// Plot stability of filters after Billinear transform
 // It works for particularly low frequencies
 // So stability might check whether poles are inside unit circle
 // because for higher orders higher fs cause weird distortions
@@ -44,10 +44,10 @@ void test_magnitude_phase_response_analog_digital()
     size_t n = 2000;
     double *magnitudes_analog = (double *)calloc(n, sizeof(double));
     double *magnitudes_digital = (double *)calloc(n, sizeof(double));
-    size_t order = 2;
+    size_t order = 1;
     size_t band = LOWPASS;
-    double cutoff = 0.5 * M_PI; // pi = fs/2, 2pi = fs
-    double fs = 44000.0;
+    double cutoff = 0.2 * M_PI; // pi = fs/2, 2pi = fs
+    double fs = 48000.0;
 
     printf("Order %zu Type %d Band %zu\n", order, BUTTERWORTH, band);
 
@@ -67,7 +67,7 @@ void test_magnitude_phase_response_analog_digital()
         printf("a%zu: %f\n", k, p_d->a_k[k]);
 
     char *l1 = concat_strings(4, "butter_analog_", "order_4_", "_lowpass", "color");
-    char *l2 = concat_strings(4, "butter_digital_", "order_4_", "_lowpass", "color");
+    char *l2 = concat_strings(4, "butter_digital_", "order_4_ ", "_lowpass", "color");
     char *labels[] = {l1,
                       l2, "Frequency - w", "Magnitude"};
 
@@ -76,11 +76,15 @@ void test_magnitude_phase_response_analog_digital()
 
     char mag_filename[] = "analog_vs_digital.png";
 
+    // Clipping
+    clip_double(magnitudes_digital, n, 1.0, -96.0);
+
     double *yss[] = {magnitudes_analog, magnitudes_digital};
     double *xss[] = {xs1,
                      xs1};
 
-    if (plot_x_y_overlay(xss, yss, n, 2, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, mag_filename) != 0) {
+    int y_range[] = {-96.0, 1.0};
+    if (plot_x_y_overlay(xss, yss, n, 2, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, mag_filename, y_range) != 0) {
         printf("png generation failed");
     }
 
@@ -110,7 +114,9 @@ void test_overlay_multiple_lines()
     double *yss[] = {ys1, ys2, ys3, ys4, ys5};
 
     size_t overlay_num = 5;
-    plot_x_y_overlay(xss, yss, n, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename);
+    int y_range[] = {1, -50};
+
+    plot_x_y_overlay(xss, yss, n, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename, y_range);
 }
 
 void test_generate_colors()
@@ -231,7 +237,7 @@ void test_bilinear_transform()
     printf("\n");
     printf("\tRef: N (x) = 0.125x2 + 0.25x + 0.125 D(x) = 0.625x2 − 0.25x + 0.125 \n");
     printf("\nmake causal and normalise\n");
-    horner_step6_make_causal_normalize_to_a0(p);
+    horner_step6_make_causal_normalize_to_a0(p, 1);
     for (size_t k = 0; k < p->size_a; k++) {
         printf("\t ak%d %Lf", p->power_denominator + k, p->a_k[k]);
     }
@@ -265,7 +271,9 @@ void test_ew_function()
     double *xss[] = {x0, y0real, x0};
     double *yss[] = {y0real, y0imag, y0abs};
 
-    plot_x_y_overlay(xss, yss, n, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename);
+    int y_range[] = {1, -50};
+
+    plot_x_y_overlay(xss, yss, n, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename, y_range);
 
     free(x0);
     for (size_t p = 0; p < 3; p++) {
@@ -329,8 +337,78 @@ void test_quantization_error_different_k()
     double **xss[] = {&ks};
     double **yss[] = {&errors};
 
-    plot_x_y_overlay(xss, yss, n, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename);
+    int range[] = {1, -50};
+
+    plot_x_y_overlay(xss, yss, n, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename, range);
 
     for (size_t k = 0; k < ks_num; k++)
         free(results[k]);
+}
+
+void test_filtering_floating_point()
+{
+
+    size_t order = 3;
+    size_t band = LOWPASS;
+    double cutoff = 0.3 * M_PI / 2.0; // 400 hz
+    double fs = 1.0;
+
+    printf("Order %zu Type %d Band %zu\n", order, BUTTERWORTH, band);
+
+    AnalogFilter *p = generate_analog_filter(order, cutoff, BUTTERWORTH, band);
+    if (!p) {
+        fprintf(stderr, "Failed to generate the analog filter.\n");
+        return;
+    }
+
+    DigitalFilter *p_d = bilinear_transform_horner_method(p, fs, cutoff); // why
+    if (p_d == NULL) {
+        free_analog_filter(p);
+        return;
+    }
+
+    double A[] = {0.1, 0.1, -0.4};
+    int stable = stabilitycheck(p_d->a_k, p_d->size_a);
+
+    printf("Stable %d \n", stable);
+
+    DirectForm1 *p_df_1 = create_df1(p_d);
+    if (p_df_1 == NULL) {
+        free_analog_filter(p);
+        free_digital_filter(p_d);
+        return;
+    }
+
+    // Generate sines
+    double freqs[] = {30.0, 900.0};
+    size_t parts_num = 1;
+    double time_len = 0.5;
+    size_t samples_num = (size_t)(fs * time_len);
+    double *x = generate_n_sines(freqs, parts_num, fs, time_len);
+    double *y = (double *)calloc(samples_num, sizeof(double));
+    double *time = (double *)calloc(samples_num, sizeof(double));
+    fill_n_with_step(time, samples_num, 0.0, time_len);
+
+    // Processing
+    process_df1(p_df_1, x, y, samples_num);
+
+    char filename[] = "df_floating_filtering.png";
+    char *labels[] = {(char *)"original", (char *)"filtered", (char *)"time", (char *)"amp"};
+
+    size_t overlay_num = 2;
+
+    for (size_t k = 0; k < 1; k++)
+        printf("%f \n", y[k]);
+
+    double *xss[] = {time, time};
+    double *yss[] = {x, y};
+
+    int range[] = {1, -50};
+    plot_x_y_overlay(xss, yss, 300, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename, range);
+
+    free(x);
+    free(time);
+    free(y);
+    free_analog_filter(p);
+    free_digital_filter(p_d);
 }

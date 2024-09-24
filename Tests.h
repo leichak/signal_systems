@@ -62,4 +62,6 @@ void test_fixed_multiplication();
 
 void test_quantization_error_different_k();
 
+void test_filtering_floating_point();
+
 #endif
