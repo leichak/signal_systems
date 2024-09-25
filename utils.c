@@ -286,16 +286,17 @@ float random_float(float min, float max)
     return min + rand_value * (max - min);
 }
 
-double *generate_n_sines(double freqs[], size_t num, double fs, double len_s)
+double *generate_n_sines(double freqs[], size_t num, size_t samples_num, double fs)
 {
     // Create array on the heap
-    size_t len = (size_t)(len_s * fs);
-    double *x = (double *)calloc(len, sizeof(double));
+    double *x = (double *)calloc(samples_num, sizeof(double));
+    double A = 1.0 / (double)num ;
+    double pi_2 = TWICE_PI;
 
-    for (size_t j = 0; j < len; j++) {
+
+    for (size_t j = 0; j < samples_num; j++) {
         for (size_t k = 0; k < num; k++) {
-            x[j] = (1.0 / ((double)num)) * sin(2.0 * M_PI * freqs[k] * ((double)j) / (double)len);
-            printf("%f \n", x[j]);
+            x[j] += A * sin((freqs[k] * (double)j / fs) * pi_2);
         }
     }
 

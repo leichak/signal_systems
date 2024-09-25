@@ -44,10 +44,10 @@ void test_magnitude_phase_response_analog_digital()
     size_t n = 2000;
     double *magnitudes_analog = (double *)calloc(n, sizeof(double));
     double *magnitudes_digital = (double *)calloc(n, sizeof(double));
-    size_t order = 1;
+    size_t order = 2;
     size_t band = LOWPASS;
-    double cutoff = 0.2 * M_PI; // pi = fs/2, 2pi = fs
-    double fs = 48000.0;
+    double cutoff = 0.1 * M_PI; // pi = fs/2, 2pi = fs
+    double fs = 1.0;
 
     printf("Order %zu Type %d Band %zu\n", order, BUTTERWORTH, band);
 
@@ -64,7 +64,7 @@ void test_magnitude_phase_response_analog_digital()
     }
 
     for (size_t k = 0; k < p_d->size_a; k++)
-        printf("a%zu: %f\n", k, p_d->a_k[k]);
+        printf("a%zu: %.64f\n", k, p_d->a_k[k]);
 
     char *l1 = concat_strings(4, "butter_analog_", "order_4_", "_lowpass", "color");
     char *l2 = concat_strings(4, "butter_digital_", "order_4_ ", "_lowpass", "color");
@@ -87,6 +87,9 @@ void test_magnitude_phase_response_analog_digital()
     if (plot_x_y_overlay(xss, yss, n, 2, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, mag_filename, y_range) != 0) {
         printf("png generation failed");
     }
+    
+    horner_step3_flip(p_d);
+    printf("Stable: %d \n", stabilitycheck(p_d->a_k, p_d->size_a));
 
     free(magnitudes_analog);
     free(magnitudes_digital);
@@ -239,12 +242,17 @@ void test_bilinear_transform()
     printf("\nmake causal and normalise\n");
     horner_step6_make_causal_normalize_to_a0(p, 1);
     for (size_t k = 0; k < p->size_a; k++) {
-        printf("\t ak%d %Lf", p->power_denominator + k, p->a_k[k]);
+        printf("\t ak%d %.60f \n", p->power_denominator + k, p->a_k[k]);
     }
     for (size_t k = 0; k < p->size_b; k++) {
-        printf("\t bk%d %Lf", p->power_numerator + k, p->b_k[k]);
+
+        printf("\t bk%d %.60f \n", p->power_numerator + k, p->b_k[k]);
     }
     printf("\n\tRef: Y [z](1 − 0.4z−1 + 0.2z−2) = X[z](0.2 + 0.4z−1 + 0.2z−2)\n");
+
+    horner_step3_flip(p);
+
+    printf("Stable %d ", stabilitycheck(p->a_k, p->size_a));
 }
 
 void test_ew_function()
@@ -348,10 +356,10 @@ void test_quantization_error_different_k()
 void test_filtering_floating_point()
 {
 
-    size_t order = 3;
+    size_t order = 2;
     size_t band = LOWPASS;
-    double cutoff = 0.3 * M_PI / 2.0; // 400 hz
-    double fs = 1.0;
+    double cutoff = 0.5 * M_PI; // fs / 2
+    double fs = 100.0;
 
     printf("Order %zu Type %d Band %zu\n", order, BUTTERWORTH, band);
 
@@ -367,10 +375,10 @@ void test_filtering_floating_point()
         return;
     }
 
-    double A[] = {0.1, 0.1, -0.4};
+    horner_step3_flip(p_d);
     int stable = stabilitycheck(p_d->a_k, p_d->size_a);
-
     printf("Stable %d \n", stable);
+    horner_step3_flip(p_d);
 
     DirectForm1 *p_df_1 = create_df1(p_d);
     if (p_df_1 == NULL) {
@@ -380,11 +388,11 @@ void test_filtering_floating_point()
     }
 
     // Generate sines
-    double freqs[] = {30.0, 900.0};
-    size_t parts_num = 1;
-    double time_len = 0.5;
+    double freqs[] = {10.0, 0.5 * fs - 10.0};
+    size_t parts_num = 2;
+    double time_len = 1.0;
     size_t samples_num = (size_t)(fs * time_len);
-    double *x = generate_n_sines(freqs, parts_num, fs, time_len);
+    double *x = generate_n_sines(freqs, parts_num, samples_num, fs);
     double *y = (double *)calloc(samples_num, sizeof(double));
     double *time = (double *)calloc(samples_num, sizeof(double));
     fill_n_with_step(time, samples_num, 0.0, time_len);
@@ -397,14 +405,14 @@ void test_filtering_floating_point()
 
     size_t overlay_num = 2;
 
-    for (size_t k = 0; k < 1; k++)
-        printf("%f \n", y[k]);
+    // for (size_t k = 0; k < 300; k++)
+    //     printf("%f \n", y[k]);
 
     double *xss[] = {time, time};
     double *yss[] = {x, y};
 
     int range[] = {1, -50};
-    plot_x_y_overlay(xss, yss, 300, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename, range);
+    plot_x_y_overlay(xss, yss, samples_num, overlay_num, 4, labels, TEST_IMAGE_OUTPUT_PREFIX, filename, range);
 
     free(x);
     free(time);

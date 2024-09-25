@@ -51,8 +51,8 @@ float butter_gain_low_pass_log10(int n, float g0, float wc, float w);
  */
 typedef struct
 {
-    double *a_k;           ///< Coefficients of the denominator polynomial.
-    double *b_k;           ///< Coefficients of the numerator polynomial.
+    long double *a_k;      ///< Coefficients of the denominator polynomial.
+    long double *b_k;      ///< Coefficients of the numerator polynomial.
     double g_0;            ///< DC gain (gain at zero frequency).
     int size_a;            ///< Number of coefficients in the denominator.
     int size_b;            ///< Number of coefficients in the numerator.
@@ -88,7 +88,7 @@ void free_analog_filter(AnalogFilter *p);
  * @param coefficients Output array where the computed coefficients will be stored.
  *                     The size of the array should be `order + 1`.
  */
-void butterworth_coefficients(int order, double *coefficients);
+void butterworth_coefficients(int order, long double *coefficients);
 
 /**
  * @brief Generate an analog filter prototype based on the specified filter type and band type.

@@ -102,6 +102,6 @@ float random_float(float min, float max);
 
 // Signal Generation
 
-double *generate_n_sines(double freqs[], size_t num, double fs, double len_s);
+double *generate_n_sines(double freqs[], size_t num, size_t samples_num, double fs);
 
 #endif

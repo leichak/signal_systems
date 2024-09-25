@@ -181,15 +181,15 @@ void process_df1(DirectForm1 *ptr, double *x, double *y, size_t samples_num)
         double y_temp = 0.0;
         for (size_t k = 0; k < ptr->max_size; k++) {
             if (k < ptr->size_b)
-                y_temp += ptr->x_k[k] * ptr->b_k[k];
+                y_temp += ptr->x_k[k] * ptr->b_k[ptr->size_b - 1 - k];
             if (k > 0 && k < ptr->size_a)
-                y_temp += ptr->y_k[k] * ptr->a_k[k];
+                y_temp += ptr->y_k[k] * ptr->a_k[ptr->size_a - 1 - k];
         }
         // Shifting y and new sample
         for (size_t k = 0; k < ptr->size_a - 1; k++)
             ptr->y_k[ptr->size_a - 1 - k] = ptr->y_k[ptr->size_a - 2 - k];
 
-        y[j] = y_temp;
+        y[j] = (ptr->a_k[0] / ptr->b_k[0]) * y_temp;
         ptr->y_k[0] = y_temp;
     }
 }

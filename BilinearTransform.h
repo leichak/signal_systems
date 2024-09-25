@@ -4,11 +4,11 @@
 #include "AnalogFilters.h"
 #include "DigitalFilters.h"
 
-void horner_step6_make_causal_normalize_to_a0(DigitalFilter *p, double fs);
+void horner_step6_make_causal_normalize_to_a0(DigitalFilter *p, long double fs);
 
 void horner_step2_5_shift_polynomial_with_n(DigitalFilter *p, long double divisor);
 
-void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewarp_w0, bool prewarp);
+void horner_step1_divide_sn_substitute(DigitalFilter *p, long double fs, long double prewarp_w0, bool prewarp);
 
 void horner_step3_flip(DigitalFilter *p);
 

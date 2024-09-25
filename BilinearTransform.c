@@ -5,7 +5,7 @@
 #include "BilinearTransform.h"
 
 // // https://arxiv.org/pdf/2401.03071
-void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewarp_w0, bool prewarp)
+void horner_step1_divide_sn_substitute(DigitalFilter *p, long double fs, long double prewarp_w0, bool prewarp)
 {
     // coefficients here should be in increasing order, 0,1,2,3,4 power
     // dividing by the 1/(s^ max_power) makes 4rth power 1 and, 0 power -4
@@ -29,7 +29,7 @@ void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewa
 
     // we can assume that if there is difference with final power and size we need to allocate
     if (p->power_denominator != p->size_a - 1) {
-        double *a_k = (double *)calloc(p->power_denominator + 1, sizeof(double));
+        long double *a_k = (long double *)calloc(p->power_denominator + 1, sizeof(double));
         for (size_t k = 0; k < p->size_a; k++) {
             a_k[k] = p->a_k[k];
         }
@@ -39,7 +39,7 @@ void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewa
     }
 
     if (p->power_numerator != p->size_b - 1) {
-        double *b_k = (double *)calloc(p->power_numerator + 1, sizeof(double));
+        long double *b_k = (long double *)calloc(p->power_numerator + 1, sizeof(long double));
         for (size_t k = 0; k < p->size_b; k++) {
             b_k[k] = p->b_k[k];
         }
@@ -48,20 +48,22 @@ void horner_step1_divide_sn_substitute(DigitalFilter *p, double fs, double prewa
         p->size_b = p->power_numerator + 1;
     }
 
-    double K;
+    long double K;
 
     if (prewarp)
-        K = prewarp_w0 / tan((prewarp_w0 / (2.0 * fs)));
+        K = prewarp_w0 / tan((prewarp_w0 / ((long double)2.0 * fs)));
     else
-        K = 2.0 * fs;
+        K = (long double)2.0 * fs;
 
     // fl is sampling frequency, multiplication
     for (size_t k = 0; k < p->size_b; k++) {
-        p->b_k[k] /= powf(K, ((long double)p->size_b - 1 - (long double)k));
+
+        p->b_k[k] /= pow(K, (long double)p->size_b - 1 - (long double)k);
     }
 
     for (size_t k = 0; k < p->size_a; k++) {
-        p->a_k[k] /= powf(K, ((long double)p->size_a - 1 - (long double)k));
+
+        p->a_k[k] /= pow(K, (long double)p->size_a - 1 - (long double)k);
     }
 
     horner_step3_flip(p);
@@ -75,8 +77,8 @@ void horner_step2_5_shift_polynomial_with_n(DigitalFilter *p, long double diviso
     // Assume that power are increasing with indexes (0,1,2,3,4), that is intuitive
     size_t size_b = p->size_b;
     size_t size_a = p->size_a;
-    double *division_b = (double *)calloc(size_b, sizeof(double));
-    double *division_a = (double *)calloc(size_a, sizeof(double));
+    long double *division_b = (long double *)calloc(size_b, sizeof(long double));
+    long double *division_a = (long double *)calloc(size_a, sizeof(long double));
     for (size_t k = 0; k < size_b; k++) { // flip them for better code
         division_b[k] = p->b_k[size_b - 1 - k];
     }
@@ -148,15 +150,15 @@ void horner_step3_flip(DigitalFilter *p)
 void horner_step4_scale_polynomial_zeros_by_2(DigitalFilter *p)
 {
     for (size_t k = 0; k < p->size_b; k++) {
-        p->b_k[k] *= powf(0.5, (long double)k);
+        p->b_k[k] *= pow(0.5, (long double)k);
     }
 
     for (size_t k = 0; k < p->size_a; k++) {
-        p->a_k[k] *= powf(0.5, (long double)k);
+        p->a_k[k] *= pow(0.5, (long double)k);
     }
 }
 
-void horner_step6_make_causal_normalize_to_a0(DigitalFilter *p, double fs)
+void horner_step6_make_causal_normalize_to_a0(DigitalFilter *p, long double fs)
 {
     // not sure whether i need it
     int power_b_max = p->size_b - 1;
@@ -181,11 +183,11 @@ void horner_step6_make_causal_normalize_to_a0(DigitalFilter *p, double fs)
     // reflect sample rate
 
     // make y0 to be 1
-    double norm = p->a_k[p->size_a - 1];
+    long double norm = p->a_k[p->size_a - 1];
     for (size_t k = 0; k < p->size_b; k++)
-        p->b_k[k] *= (1.0 / norm);
+        p->b_k[k] *= ((long double)1.0 / norm);
     for (size_t k = 0; k < p->size_a; k++)
-        p->a_k[k] *= (1.0 / norm);
+        p->a_k[k] *= ((long double)1.0 / norm);
 }
 
 DigitalFilter *bilinear_transform_horner_method(AnalogFilter *p, double fs, double w0)
@@ -193,8 +195,8 @@ DigitalFilter *bilinear_transform_horner_method(AnalogFilter *p, double fs, doub
     DigitalFilter *p_d = (DigitalFilter *)malloc(sizeof(DigitalFilter));
     if (p_d == NULL)
         return NULL;
-    p_d->a_k = (double *)calloc(p->size_a, sizeof(double));
-    p_d->b_k = (double *)calloc(p->size_b, sizeof(double));
+    p_d->a_k = (long double *)calloc(p->size_a, sizeof(long double));
+    p_d->b_k = (long double *)calloc(p->size_b, sizeof(long double));
     for (size_t k = 0; k < p->size_b; k++)
         p_d->b_k[k] = p->b_k[k];
     for (size_t k = 0; k < p->size_a; k++)
@@ -205,11 +207,11 @@ DigitalFilter *bilinear_transform_horner_method(AnalogFilter *p, double fs, doub
     p_d->power_denominator = 0;
 
     // Input coefficients from analog are in order 0,1...n power
-    horner_step1_divide_sn_substitute(p_d, fs, w0, true);
+    horner_step1_divide_sn_substitute(p_d, (long double)fs, (long double)w0, true);
     horner_step2_5_shift_polynomial_with_n(p_d, 1.0);
     horner_step3_flip(p_d);
     horner_step4_scale_polynomial_zeros_by_2(p_d);
-    horner_step2_5_shift_polynomial_with_n(p_d, -1);
+    horner_step2_5_shift_polynomial_with_n(p_d, -1.0);
     horner_step6_make_causal_normalize_to_a0(p_d, 1.0);
 
     return p_d;
@@ -226,10 +228,10 @@ int stabilitycheck(double *A, int length)
     int stable = 1;     // Assume stable unless shown otherwise
 
     // Ensure A is a column vector (already handled as a pointer in C)
-    for (int i = N - 1; i >= 0; i--) {
+    for (int i = N - 1; i > -1; i--) {
         double rci = A[i + 1]; // Get reflection coefficient
 
-        if (fabs(rci) >= 1) {
+        if (fabs(rci) >= 1.0) {
             stable = 0;
             return stable; // System is unstable
         }

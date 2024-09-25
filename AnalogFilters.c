@@ -41,9 +41,9 @@ void free_analog_filter(AnalogFilter *p)
 }
 
 // Generates the coefficients for a Butterworth filter of a given order
-void butterworth_coefficients(int order, double *coefficients)
+void butterworth_coefficients(int order, long double *coefficients)
 {
-    double gamma = M_PI / (2.0 * order);
+    long double gamma = M_PI / ((long double)2.0 * (long double)order);
 
     // Initialize the first coefficient (a0)
     coefficients[0] = 1.0;
@@ -94,7 +94,7 @@ void *generate_butterworth(int n, AnalogFilter *f)
     f->order_denominator = n;
     f->order_numerator = 0;
     f->size_b = f->order_numerator + 1;
-    f->b_k = (double *)malloc(f->size_b * sizeof(double));
+    f->b_k = (long double *)malloc(f->size_b * sizeof(double));
     if (f->b_k == NULL) {
         free(f);
         return NULL;
@@ -102,7 +102,7 @@ void *generate_butterworth(int n, AnalogFilter *f)
     f->b_k[0] = 1.0;
 
     f->size_a = n + 1;
-    f->a_k = (double *)malloc(f->size_a * sizeof(double));
+    f->a_k = (long double *)malloc(f->size_a * sizeof(double));
     if (f->a_k == NULL) {
         free(f->b_k);
         free(f);
@@ -117,7 +117,7 @@ void *generate_butterworth(int n, AnalogFilter *f)
 void transform_to_low_pass(AnalogFilter *p, double wc)
 {
     for (int i = 1; i < p->size_a; i++) {
-        p->a_k[i] *= pow(1.0 / wc, i);
+        p->a_k[i] *= pow((long double)1.0 / (long double)wc, (long double)i);
     }
 }
 
