@@ -1,10 +1,8 @@
-
 #ifndef FIXEDPOINT_HPP
 #define FIXEDPOINT_HPP
+
 #include <math.h>
 #include <stdlib.h>
-/*
-Source:
 
 /*
  * Floating Point to Fixed Point Conversion and Arithmetic
@@ -32,6 +30,7 @@ Source:
  *    - **Value Formula for ufix<N,k>**:
  *      V_ufix<N,k> = b_(N-k-1) * 2^(N-k-1) + ... + b_0 + b_(-1) * 2^(-1) + ... + b_k * 2^(-k).
  *    - **Example**:
+ *
  *      | 2^1 | 2^0 | 2^-1 | 2^-2 | 2^-3 | 2^-4 | Unsigned | ufix<6,4> |
  *      |-----|-----|------|------|------|------|----------|----------|
  *      | 0   | 0   | 0    | 0    | 0    | 0    | 0        | 0        |
@@ -42,18 +41,20 @@ Source:
  *
  * 4. **Conversion Relationships**
  *    - **Unsigned Integer to Fixed Point**:
- *      V_uint<N> = V_ufix<N,k> * 2^k
- *      V_ufix<N,k> = V_uint<N> * 2^(-k)
+ *      - V_uint<N> = V_ufix<N,k> * 2^k
+ *      - V_ufix<N,k> = V_uint<N> * 2^(-k)
  *
  *    - **Floating Point to Fixed Point**: Convert by scaling and converting to an
  *      integer data type.
  *
  * 5. **Signed Fixed Point Representation**
  *    - **Two's Complement**: Common method for representing signed integers.
- *    - **Value Formula for Signed Integer**: V_int<N> = b_(N-1) * [-(2^(N-1))] + ... + b_0.
+ *    - **Value Formula for Signed Integer**:
+ *      V_int<N> = b_(N-1) * [-(2^(N-1))] + ... + b_0.
  *    - **Value Formula for Signed Fixed Point**:
  *      V_fix<N,k> = b_(N-k-1) * [-(2^(N-k-1))] + ... + b_0 + b_(-1) * 2^(-1) + ... + b_k * 2^(-k).
  *    - **Example**:
+ *
  *      | 2^1 | 2^0 | 2^-1 | 2^-2 | 2^-3 | 2^-4 | Signed  | ufix<6,4> |
  *      |-----|-----|------|------|------|------|---------|----------|
  *      | 0   | 0   | 0    | 0    | 0    | 0    | 0       | 0        |
@@ -65,6 +66,7 @@ Source:
  * 6. **Conversion Examples**
  *    - **From Floating Point to Fixed Point**:
  *      - Code Example:
+ *
  *        ```c
  *        #include <stdio.h>
  *
@@ -89,6 +91,7 @@ Source:
  *
  *    - **From Fixed Point to Floating Point**:
  *      - Code Example:
+ *
  *        ```c
  *        void fn_fixed_2_float() {
  *            int taps_8_6[5] = {6, 75, -19, 127, -96};
@@ -119,15 +122,10 @@ Source:
  */
 
 int to_fix(float x, int k);
-
 float to_float(int x, int k);
-
 int fixed_N_k_mul(int x, int y, int k);
-
 int fixed_N_k_add(int x, int y);
-
 int fixed_N1_k2_add(int x_k1, int y_k2, int k1, int k2);
-
 int fixed_N1_k1_add(int x_k1, int y_k2, int k1, int k2);
 
-#endif
+#endif // FIXEDPOINT_HPP

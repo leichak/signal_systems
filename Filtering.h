@@ -105,91 +105,92 @@
 /// @brief  Direct-form I
 typedef struct
 {
-    double *b_k;
-    double *a_k;
-    double *y_k;
-    double *x_k;
-    size_t size_b;
-    size_t size_a;
-    size_t max_size;
+    double *b_k;     ///< Coefficients for the zeros (numerator)
+    double *a_k;     ///< Coefficients for the poles (denominator)
+    double *y_k;     ///< Output values
+    double *x_k;     ///< Input values
+    size_t size_b;   ///< Number of zero coefficients
+    size_t size_a;   ///< Number of pole coefficients
+    size_t max_size; ///< Maximum size allocated
 } DirectForm1;
 
 /// @brief  Direct-form I 32.15
 typedef struct
 {
-    int *b_k;
-    int *a_k;
-    int *y_k;
-    int *x_k;
-    size_t size_b;
-    size_t size_a;
-    size_t max_size;
-} DirectForm1Q15; //
+    int *b_k;        ///< Coefficients for the zeros (numerator)
+    int *a_k;        ///< Coefficients for the poles (denominator)
+    int *y_k;        ///< Output values
+    int *x_k;        ///< Input values
+    size_t size_b;   ///< Number of zero coefficients
+    size_t size_a;   ///< Number of pole coefficients
+    size_t max_size; ///< Maximum size allocated
+} DirectForm1Q15;    // Fixed-point representation
 
 /// @brief  Direct-form II
 typedef struct
 {
-    double *b_k;
-    double *a_k;
-    double *v_k;
-    size_t size_b;
-    size_t size_a;
-    size_t max_size;
+    double *b_k;     ///< Coefficients for the zeros (numerator)
+    double *a_k;     ///< Coefficients for the poles (denominator)
+    double *v_k;     ///< State variables
+    size_t size_b;   ///< Number of zero coefficients
+    size_t size_a;   ///< Number of pole coefficients
+    size_t max_size; ///< Maximum size allocated
 } DirectForm2;
 
 /// @brief  Direct-form II 32.15
 typedef struct
 {
-    int *b_k;
-    int *a_k;
-    int *v_k;
-    size_t size_b;
-    size_t size_a;
-    size_t max_size;
+    int *b_k;        ///< Coefficients for the zeros (numerator)
+    int *a_k;        ///< Coefficients for the poles (denominator)
+    int *v_k;        ///< State variables
+    size_t size_b;   ///< Number of zero coefficients
+    size_t size_a;   ///< Number of pole coefficients
+    size_t max_size; ///< Maximum size allocated
 } DirectForm2Q15;
 
 /// @brief  Direct-form I Transposed
 typedef struct
 {
-    double *b_k;
-    double *a_k;
-    double **s_a;
-    double **s_b;
-    size_t size_b;
-    size_t size_a;
+    double *b_k;   ///< Coefficients for the zeros (numerator)
+    double *a_k;   ///< Coefficients for the poles (denominator)
+    double **s_a;  ///< State variables for poles
+    double **s_b;  ///< State variables for zeros
+    size_t size_b; ///< Number of zero coefficients
+    size_t size_a; ///< Number of pole coefficients
 } DirectForm1Transposed;
 
 /// @brief  Direct-form I Transposed 16.15
 typedef struct
 {
-    int *b_k;
-    int *a_k;
-    int *s_a;
-    int *s_b;
-    size_t size_b;
-    size_t size_a;
+    int *b_k;      ///< Coefficients for the zeros (numerator)
+    int *a_k;      ///< Coefficients for the poles (denominator)
+    int *s_a;      ///< State variables for poles
+    int *s_b;      ///< State variables for zeros
+    size_t size_b; ///< Number of zero coefficients
+    size_t size_a; ///< Number of pole coefficients
 } DirectForm1TransposedQ15;
 
 /// @brief  Direct-form II Transposed
 typedef struct
 {
-    double *b_k;
-    double *a_k;
-    double *s_ab;
-    size_t size_b;
-    size_t size_a;
+    double *b_k;   ///< Coefficients for the zeros (numerator)
+    double *a_k;   ///< Coefficients for the poles (denominator)
+    double *s_ab;  ///< State variables
+    size_t size_b; ///< Number of zero coefficients
+    size_t size_a; ///< Number of pole coefficients
 } DirectForm2Transposed;
 
 /// @brief  Direct-form II Transposed 16.15
 typedef struct
 {
-    int *b_k;
-    int *a_k;
-    int *s_ab;
-    size_t size_b;
-    size_t size_a;
+    int *b_k;      ///< Coefficients for the zeros (numerator)
+    int *a_k;      ///< Coefficients for the poles (denominator)
+    int *s_ab;     ///< State variables
+    size_t size_b; ///< Number of zero coefficients
+    size_t size_a; ///< Number of pole coefficients
 } DirectForm2TransposedQ15;
 
+// Function declarations
 void process_df1(DirectForm1 *ptr, double *x, double *y, size_t samples_num);
 void process_df1_q15(DirectForm1Q15 *ptr, double *x, double *y, size_t samples_num);
 void process_df2(DirectForm2 *ptr, double *x, double *y, size_t samples_num);
@@ -199,6 +200,7 @@ void process_df1_transposed_q15(DirectForm1TransposedQ15 *ptr, double *x, double
 void process_df2_transposed(DirectForm2Transposed *ptr, double *x, double *y, size_t samples_num);
 void process_df2_transposed_q15(DirectForm2TransposedQ15 *ptr, double *x, double *y, size_t samples_num);
 
+// Factory functions for creating filter structures
 DirectForm1 *create_df1(DigitalFilter *filter_ptr);
 DirectForm1Q15 *create_df1_q15(DigitalFilter *filter_ptr);
 DirectForm2 *create_df2(DigitalFilter *filter);

@@ -43,7 +43,7 @@ void free_analog_filter(AnalogFilter *p)
 // Generates the coefficients for a Butterworth filter of a given order
 void butterworth_coefficients(int order, long double *coefficients)
 {
-    long double gamma = M_PI / ((long double)2.0 * (long double)order);
+    long double gamma = M_PI / (2.0 * (long double)order);
 
     // Initialize the first coefficient (a0)
     coefficients[0] = 1.0;
@@ -63,8 +63,9 @@ void butterworth_coefficients(int order, long double *coefficients)
 AnalogFilter *generate_analog_filter(int n, double wc, FilterTypes filter_type, BandType band_type)
 {
     AnalogFilter *f = (AnalogFilter *)malloc(sizeof(AnalogFilter));
-    if (f == NULL)
+    if (f == NULL) {
         return NULL;
+    }
 
     switch (filter_type) {
     case BUTTERWORTH:
@@ -94,6 +95,8 @@ void *generate_butterworth(int n, AnalogFilter *f)
     f->order_denominator = n;
     f->order_numerator = 0;
     f->size_b = f->order_numerator + 1;
+
+    // Allocate memory for numerator coefficients (b_k)
     f->b_k = (long double *)malloc(f->size_b * sizeof(double));
     if (f->b_k == NULL) {
         free(f);
@@ -101,6 +104,7 @@ void *generate_butterworth(int n, AnalogFilter *f)
     }
     f->b_k[0] = 1.0;
 
+    // Allocate memory for denominator coefficients (a_k)
     f->size_a = n + 1;
     f->a_k = (long double *)malloc(f->size_a * sizeof(double));
     if (f->a_k == NULL) {
@@ -108,8 +112,8 @@ void *generate_butterworth(int n, AnalogFilter *f)
         free(f);
         return NULL;
     }
-    butterworth_coefficients(f->order_denominator, f->a_k);
 
+    butterworth_coefficients(f->order_denominator, f->a_k);
     return f; // Return a non-null pointer to indicate successful allocation
 }
 
@@ -124,6 +128,7 @@ void transform_to_low_pass(AnalogFilter *p, double wc)
 // Performs a high-pass frequency transformation on the filter
 void transform_to_high_pass(AnalogFilter *p, double wc)
 {
+    // Implementation pending
 }
 
 // Normalizes the filter coefficients to their maximum
@@ -132,11 +137,13 @@ void normalize_to_max(AnalogFilter *p)
     double a_max = p->a_k[0];
     double b_max = p->b_k[0];
 
+    // Find maximum value in numerator coefficients
     for (int i = 1; i < p->size_b; i++) {
         if (p->b_k[i] > b_max)
             b_max = p->b_k[i];
     }
 
+    // Find maximum value in denominator coefficients
     for (int i = 1; i < p->size_a; i++) {
         if (p->a_k[i] > a_max)
             a_max = p->a_k[i];
@@ -144,29 +151,36 @@ void normalize_to_max(AnalogFilter *p)
 
     p->g_0 = a_max / b_max;
 
+    // Normalize the coefficients
     for (int i = 1; i < p->size_a; i++) {
         p->a_k[i] /= p->g_0;
     }
 }
 
+// Calculates the magnitude response of the analog filter
 double *magnitude_response_analog_filter(AnalogFilter *p, double *magnitudes, int n)
 {
     double *w_k = (double *)calloc(n, sizeof(double));
     if (w_k == NULL) {
         return NULL;
     }
+
     fill_n_with_step(w_k, n, -M_PI, M_PI);
     complex double numerator, denominator, hw = 0 * 0.0I;
     size_t size = max_int(p->size_a, p->size_b);
+
+    // Calculate the magnitude response
     for (size_t i = 0; i < n; i++) {
         numerator = 0.0;
         denominator = 0.0;
+
         for (size_t k = 0; k < size; k++) {
             if (k < p->size_a)
                 denominator += p->a_k[k] * cpow((w_k[i]) * I, (double)(k));
             if (k < p->size_b)
                 numerator += p->b_k[k] * cpow((w_k[i]) * I, (double)(k));
         }
+
         hw = numerator / denominator;
         magnitudes[i] = 20 * log10(cabs(hw));
     }
@@ -174,28 +188,34 @@ double *magnitude_response_analog_filter(AnalogFilter *p, double *magnitudes, in
     return w_k;
 }
 
+// Calculates the phase response of the analog filter
 double *phase_response_analog_filter(AnalogFilter *p, double *phases, int n)
 {
     double *w_k = (double *)calloc(n, sizeof(double));
     if (w_k == NULL) {
         return NULL;
     }
+
     fill_n_with_step(w_k, n, -M_PI, M_PI);
     complex double numerator, denominator, hw = 0 * 0.0I;
     size_t size = max_int(p->size_a, p->size_b);
+
+    // Calculate the phase response
     for (size_t i = 0; i < n; i++) {
         numerator = 0.0;
         denominator = 0.0;
+
         for (size_t k = 0; k < size; k++) {
             if (k < p->size_a)
                 denominator += p->a_k[k] * cpow((w_k[i] / M_PI) * I, (double)(k));
             if (k < p->size_b)
                 numerator += p->b_k[k] * cpow((w_k[i] / M_PI) * I, (double)(k));
         }
+
         hw = numerator / denominator;
         double hw_re = creal(hw);
         double hw_im = cimag(hw);
-        phases[i] = atan(hw_im / hw_re);
+        phases[i] = atan2(hw_im, hw_re); // Use atan2 for correct phase calculation
     }
 
     return w_k;

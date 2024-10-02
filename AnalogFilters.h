@@ -1,11 +1,10 @@
 #ifndef ANALOGFILTERS_H
 #define ANALOGFILTERS_H
 
+#include "Utils.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "Utils.h"
 
 // Enumeration for filter types
 typedef enum
@@ -51,15 +50,15 @@ float butter_gain_low_pass_log10(int n, float g0, float wc, float w);
  */
 typedef struct
 {
-    long double *a_k;      ///< Coefficients of the denominator polynomial.
-    long double *b_k;      ///< Coefficients of the numerator polynomial.
-    double g_0;            ///< DC gain (gain at zero frequency).
-    int size_a;            ///< Number of coefficients in the denominator.
-    int size_b;            ///< Number of coefficients in the numerator.
-    int order_numerator;   ///< Order of the numerator polynomial.
-    int order_denominator; ///< Order of the denominator polynomial.
-    BandType band_type;
-    FilterTypes filter_type;
+    long double *a_k;        ///< Coefficients of the denominator polynomial.
+    long double *b_k;        ///< Coefficients of the numerator polynomial.
+    double g_0;              ///< DC gain (gain at zero frequency).
+    int size_a;              ///< Number of coefficients in the denominator.
+    int size_b;              ///< Number of coefficients in the numerator.
+    int order_numerator;     ///< Order of the numerator polynomial.
+    int order_denominator;   ///< Order of the denominator polynomial.
+    BandType band_type;      ///< Type of band for the filter.
+    FilterTypes filter_type; ///< Type of filter (e.g., BUTTERWORTH).
 } AnalogFilter;
 
 /**
@@ -117,8 +116,6 @@ void transform_to_low_pass(AnalogFilter *p, double wc);
  */
 void transform_to_high_pass(AnalogFilter *p, double wc);
 
-// TODO - Implement transform_to_band_pass, transform_to_band_stop
-
 /**
  * @brief Normalize the coefficients of the numerator and denominator by their maximum value.
  *
@@ -127,20 +124,27 @@ void transform_to_high_pass(AnalogFilter *p, double wc);
 void normalize_to_max(AnalogFilter *p);
 
 /**
- * @brief Function calculating magnitude response of causal filter
- * M(\omega)=|H(e^{j\omega})| is a function of \omega that is called the magnitude response of the amplitude response of the system.
- * \begin{align*}M(\omega)=\sqrt{\big( \Re \{H(e^{j\omega}) \}\big)^{2}+\big( \Im \{H(e^{j\omega}) \}\big) ^{2}}\end{align*}
- * reference:
- * https://aleksandarhaber.com/magnitude-amplitude-and-phase-response-of-discrete-time-systems-and-filters/
+ * @brief Calculate the magnitude response of a causal filter.
+ *
+ * M(\omega)=|H(e^{j\omega})| is a function of \omega called the magnitude response of the amplitude response of the system.
+ *
+ * @param p Pointer to the AnalogFilter structure.
+ * @param magnitudes Output array where the magnitude response will be stored.
+ * @param n The number of frequency points.
+ * @return Array of frequencies (w_k).
  */
 double *magnitude_response_analog_filter(AnalogFilter *p, double *magnitudes, int n);
 
 /**
- * @brief Function calculating phase response of causal filter
- * phase response is then computed by solving this equation
- * (7) \begin{align*}\tan \left( \theta (\omega ) \right) = \frac{\Im \{H(e^{j\omega}) \}}{\Re \{H(e^{j\omega}) \}}\end{align*}
- * reference:
- * https://aleksandarhaber.com/magnitude-amplitude-and-phase-response-of-discrete-time-systems-and-filters/
+ * @brief Calculate the phase response of a causal filter.
+ *
+ * Phase response is computed by solving the equation:
+ * \tan(\theta(\omega)) = \frac{\Im\{H(e^{j\omega})\}}{\Re\{H(e^{j\omega})\}}
+ *
+ * @param p Pointer to the AnalogFilter structure.
+ * @param phases Output array where the phase response will be stored.
+ * @param n The number of frequency points.
+ * @return Array of frequencies (w_k).
  */
 double *phase_response_analog_filter(AnalogFilter *p, double *phases, int n);
 

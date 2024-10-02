@@ -9,13 +9,15 @@
 #include "Utils.h"
 
 /**
- * @brief Structure to represent a digital filter.
+ * @brief Structure representing a digital filter.
  *
- * This structure is used to store the coefficients and parameters of
- * a digital filter, typically obtained after transforming an analog filter.
- * Coefficients in this filter are in form
- * Ref: Y [z](1 − 0.4z−1 + 0.2z−2) = X[z](0.2 + 0.4z−1 + 0.2z−2)
- * a0,a1,a2... = z-2,z-1,z0..., similarly for bk
+ * This structure stores the coefficients and parameters of a digital filter,
+ * typically obtained after transforming an analog filter. The coefficients are
+ * represented in the form:
+ *
+ * Y[z](1 − 0.4z⁻¹ + 0.2z⁻²) = X[z](0.2 + 0.4z⁻¹ + 0.2z⁻²)
+ *
+ * where a₀, a₁, a₂... correspond to z⁻², z⁻¹, z⁰..., and similarly for bₖ.
  */
 typedef struct
 {
@@ -23,8 +25,8 @@ typedef struct
     long double *b_k;      ///< Coefficients of the numerator polynomial.
     int size_a;            ///< Number of coefficients in the denominator polynomial.
     int size_b;            ///< Number of coefficients in the numerator polynomial.
-    int power_numerator;   ///< Max power in polynomial
-    int power_denominator; ///< Max power in polynomial
+    int power_numerator;   ///< Maximum power in the numerator polynomial.
+    int power_denominator; ///< Maximum power in the denominator polynomial.
 } DigitalFilter;
 
 /**
@@ -36,25 +38,46 @@ typedef struct
  *
  * @param p A pointer to the `DigitalFilter` structure to be freed.
  *
- * After calling this function, the pointer `p` should no longer be used
+ * After calling this function, the pointer `p` should not be used
  * to refer to the filter without reinitializing it.
  */
 void free_digital_filter(DigitalFilter *p);
 
 /**
- * @brief Function calculating magnitude response of causal filter
- * M(\omega)=|H(e^{j\omega})| is a function of \omega that is called the magnitude response of the amplitude response of the system.
- * \begin{align*}M(\omega)=\sqrt{\big( \Re \{H(e^{j\omega}) \}\big)^{2}+\big( \Im \{H(e^{j\omega}) \}\big) ^{2}}\end{align*}
- * reference:
+ * @brief Calculates the magnitude response of a causal filter.
+ *
+ * The magnitude response is defined as:
+ *
+ * \[
+ * M(\omega) = |H(e^{j\omega})| = \sqrt{(\Re\{H(e^{j\omega})\})^2 + (\Im\{H(e^{j\omega})\})^2}
+ * \]
+ *
+ * @param p A pointer to the `DigitalFilter` structure.
+ * @param magnitudes An array to store the calculated magnitudes.
+ * @param n The number of frequency points.
+ * @param fs The sampling frequency.
+ * @return A pointer to the array containing the magnitude response.
+ *
+ * Reference:
  * https://aleksandarhaber.com/magnitude-amplitude-and-phase-response-of-discrete-time-systems-and-filters/
  */
 double *magnitude_response_digital_filter(DigitalFilter *p, double *magnitudes, int n, double fs);
 
 /**
- * @brief Function calculating phase response of causal filter
- * phase response is then computed by solving this equation
- * (7) \begin{align*}\tan \left( \theta (\omega ) \right) = \frac{\Im \{H(e^{j\omega}) \}}{\Re \{H(e^{j\omega}) \}}\end{align*}
- * reference:
+ * @brief Calculates the phase response of a causal filter.
+ *
+ * The phase response is computed using the equation:
+ *
+ * \[
+ * \tan(\theta(\omega)) = \frac{\Im\{H(e^{j\omega})\}}{\Re\{H(e^{j\omega})\}}
+ * \]
+ *
+ * @param p A pointer to the `DigitalFilter` structure.
+ * @param phases An array to store the calculated phases.
+ * @param n The number of frequency points.
+ * @return A pointer to the array containing the phase response.
+ *
+ * Reference:
  * https://aleksandarhaber.com/magnitude-amplitude-and-phase-response-of-discrete-time-systems-and-filters/
  */
 double *phase_response_digital_filter(DigitalFilter *p, double *phases, int n);
